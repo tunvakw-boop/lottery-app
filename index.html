@@ -4,6 +4,110 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>ระบบจัดการขายหวย</title>
+
+  <!-- PWA Icon (SVG inline as base64, renders on all devices) -->
+  <script>
+  (function(){
+    var svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+      <rect width="512" height="512" rx="100" fill="white"/>
+      <defs>
+        <linearGradient id="b" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffb3c6"/>
+          <stop offset="100%" stop-color="#ff6b95"/>
+        </linearGradient>
+        <linearGradient id="ct" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ffe566"/>
+          <stop offset="100%" stop-color="#ffb300"/>
+        </linearGradient>
+        <linearGradient id="cs" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#e6a800"/>
+          <stop offset="100%" stop-color="#cc8800"/>
+        </linearGradient>
+      </defs>
+      <!-- Bag body -->
+      <ellipse cx="272" cy="295" rx="158" ry="158" fill="url(#b)" stroke="#e05070" stroke-width="5"/>
+      <!-- Bag highlight -->
+      <ellipse cx="225" cy="238" rx="48" ry="68" fill="white" opacity="0.22" transform="rotate(-20,225,238)"/>
+      <!-- Wrinkles -->
+      <path d="M370 275 Q392 300 380 335" stroke="#e87090" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M382 245 Q408 270 395 305" stroke="#e87090" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- Dollar sign -->
+      <text x="278" y="325" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="115" font-weight="900" fill="#ff4080" opacity="0.82">$</text>
+      <!-- Neck -->
+      <ellipse cx="258" cy="142" rx="58" ry="30" fill="#ff80a0" stroke="#e05070" stroke-width="3"/>
+      <!-- Rope -->
+      <path d="M200 142 Q210 100 228 84 Q244 70 258 66 Q272 70 288 84 Q306 100 316 142" stroke="#6dbf67" stroke-width="11" fill="none" stroke-linecap="round"/>
+      <path d="M206 142 Q216 104 232 88 Q247 74 258 70 Q270 74 285 88 Q300 104 310 142" stroke="#b8eeaa" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.7"/>
+      <!-- Bow left -->
+      <ellipse cx="210" cy="100" rx="35" ry="22" fill="#6dbf67" stroke="#4a9e45" stroke-width="3" transform="rotate(-30,210,100)"/>
+      <ellipse cx="213" cy="96" rx="22" ry="13" fill="#b8eeaa" opacity="0.55" transform="rotate(-30,213,96)"/>
+      <!-- Bow right -->
+      <ellipse cx="306" cy="100" rx="35" ry="22" fill="#6dbf67" stroke="#4a9e45" stroke-width="3" transform="rotate(30,306,100)"/>
+      <ellipse cx="303" cy="96" rx="22" ry="13" fill="#b8eeaa" opacity="0.55" transform="rotate(30,303,96)"/>
+      <!-- Knot -->
+      <ellipse cx="258" cy="108" rx="17" ry="14" fill="#5ab055" stroke="#4a9e45" stroke-width="2.5"/>
+      <!-- Tails -->
+      <path d="M250 118 Q238 138 226 150" stroke="#6dbf67" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <path d="M266 118 Q278 138 290 150" stroke="#6dbf67" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <!-- Coins back row -->
+      <ellipse cx="118" cy="435" rx="37" ry="12" fill="url(#cs)"/>
+      <ellipse cx="118" cy="423" rx="37" ry="12" fill="url(#ct)" stroke="#cc8800" stroke-width="2.5"/>
+      <text x="118" y="428" text-anchor="middle" font-family="Arial Black" font-size="13" font-weight="900" fill="#b87800">$</text>
+      <ellipse cx="182" cy="440" rx="37" ry="12" fill="url(#cs)"/>
+      <ellipse cx="182" cy="428" rx="37" ry="12" fill="url(#ct)" stroke="#cc8800" stroke-width="2.5"/>
+      <text x="182" y="433" text-anchor="middle" font-family="Arial Black" font-size="13" font-weight="900" fill="#b87800">$</text>
+      <!-- Coin stack left -->
+      <ellipse cx="130" cy="412" rx="35" ry="11" fill="url(#cs)"/>
+      <ellipse cx="130" cy="400" rx="35" ry="11" fill="url(#ct)" stroke="#cc8800" stroke-width="2.5"/>
+      <ellipse cx="130" cy="388" rx="35" ry="11" fill="url(#ct)" stroke="#cc8800" stroke-width="2.5"/>
+      <text x="130" y="393" text-anchor="middle" font-family="Arial Black" font-size="12" font-weight="900" fill="#b87800">$</text>
+      <!-- Coin stack center -->
+      <ellipse cx="196" cy="420" rx="37" ry="12" fill="url(#cs)"/>
+      <ellipse cx="196" cy="408" rx="37" ry="12" fill="url(#ct)" stroke="#cc8800" stroke-width="2.5"/>
+      <ellipse cx="196" cy="396" rx="37" ry="12" fill="url(#ct)" stroke="#cc8800" stroke-width="2.5"/>
+      <ellipse cx="196" cy="384" rx="37" ry="12" fill="url(#ct)" stroke="#cc8800" stroke-width="2.5"/>
+      <text x="196" y="389" text-anchor="middle" font-family="Arial Black" font-size="12" font-weight="900" fill="#b87800">$</text>
+      <!-- Coin front -->
+      <ellipse cx="152" cy="448" rx="37" ry="12" fill="url(#cs)"/>
+      <ellipse cx="152" cy="436" rx="37" ry="12" fill="url(#ct)" stroke="#cc8800" stroke-width="2.5"/>
+      <text x="152" y="441" text-anchor="middle" font-family="Arial Black" font-size="13" font-weight="900" fill="#b87800">$</text>
+    </svg>`;
+    var b64 = btoa(unescape(encodeURIComponent(svg)));
+    var uri = 'data:image/svg+xml;base64,' + b64;
+    // Apple touch icon
+    var appleLink = document.createElement('link');
+    appleLink.rel = 'apple-touch-icon';
+    appleLink.href = uri;
+    document.head.appendChild(appleLink);
+    // Favicon
+    var favLink = document.createElement('link');
+    favLink.rel = 'icon';
+    favLink.type = 'image/svg+xml';
+    favLink.href = uri;
+    document.head.appendChild(favLink);
+    // Manifest inline
+    var manifest = {
+      name: 'ระบบขายหวย',
+      short_name: 'หวย',
+      start_url: '.',
+      display: 'standalone',
+      background_color: '#ffffff',
+      theme_color: '#f5f0e8',
+      icons: [{src: uri, sizes: '512x512', type: 'image/svg+xml'}]
+    };
+    var mLink = document.createElement('link');
+    mLink.rel = 'manifest';
+    mLink.href = 'data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(manifest))));
+    document.head.appendChild(mLink);
+  })();
+  </script>
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="หวย">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f5f0e8">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;font-family:'Sarabun',sans-serif}
