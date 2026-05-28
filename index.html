@@ -39,6 +39,7 @@
   <meta name="theme-color" content="#f5f0e8">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;font-family:'Sarabun',sans-serif}
     body{background:#f5f0e8;min-height:100vh;padding:20px 16px}
@@ -173,8 +174,33 @@ document.getElementById('dateInput').addEventListener('change',e=>{dateVal=e.tar
 function confirmReset(){document.getElementById('resetModal').style.display='flex';}
 function closeModal(){document.getElementById('resetModal').style.display='none';}
 function doReset(){stateBottom=new Array(100).fill(false);stateTop=new Array(100).fill(false);closeModal();renderAll();save();}
-function exportImage(){const TM=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];function fmt(d){const[y,m,day]=d.split('-');return parseInt(day)+' '+TM[parseInt(m)-1]+' '+(parseInt(y)+543);}const dt=fmt(dateVal);const padding=24,gridW=380,gap=24,cellSize=(gridW-2)/10,headerH=76,subH=26,sectionH=headerH+subH+cellSize*10,canvasW=padding*2+gridW*2+gap,canvasH=padding*2+sectionH;const canvas=document.createElement('canvas');canvas.width=canvasW*2;canvas.height=canvasH*2;const ctx=canvas.getContext('2d');ctx.scale(2,2);ctx.fillStyle='#f5f0e8';ctx.fillRect(0,0,canvasW,canvasH);const mc=document.createElement('canvas').getContext('2d');function fitText(text,x,y,maxW,font){mc.font=font;const m=font.match(/(\d+)px/);let size=m?parseInt(m[1]):10;while(mc.measureText(text).width>maxW&&size>7){size--;mc.font=font.replace(/\d+px/,size+'px');}ctx.font=mc.font;ctx.fillText(text,x,y);}function drawSection(state,x,y,w,label,isTop){const hBg=isTop?'#fce4ec':'#d4edda',sBg=isTop?'#f8bbd0':'#a8d5b5',border=isTop?'#e91e8c':'#6db98a',totalH=headerH+subH+cellSize*10;ctx.strokeStyle=border;ctx.lineWidth=2;ctx.strokeRect(x,y,w,totalH);ctx.fillStyle=hBg;ctx.fillRect(x+1,y+1,w-2,headerH);ctx.textAlign='center';ctx.fillStyle='#222';ctx.font='bold 13px sans-serif';ctx.fillText(label,x+w/2,y+17);ctx.font='12px sans-serif';ctx.fillStyle='#333';ctx.fillText('งวดวันที่ '+dt,x+w/2,y+33);ctx.font='11px sans-serif';ctx.fillStyle='#555';ctx.fillText('เบอร์ละ 100 บาท',x+w/2,y+50);ctx.fillStyle='#c62828';ctx.font='bold 11px sans-serif';ctx.fillText('***เงินสด 7,100 บาท***',x+w/2,y+66);ctx.fillStyle=sBg;ctx.fillRect(x+1,y+headerH,w-2,subH);ctx.fillStyle='#444';fitText('เบอร์ละ 100 บาท ***เงินสด 7,100 บาท***',x+w/2,y+headerH+17,w-16,'bold 11px sans-serif');for(let i=0;i<100;i++){const col=i%10,row=Math.floor(i/10),cx=x+1+col*cellSize,cy=y+headerH+subH+row*cellSize;ctx.fillStyle=state[i]?soldColor.bg:'#fff';ctx.fillRect(cx,cy,cellSize,cellSize);ctx.strokeStyle='#ddd';ctx.lineWidth=0.5;ctx.strokeRect(cx,cy,cellSize,cellSize);ctx.fillStyle=state[i]?soldColor.text:'#333';ctx.font='bold '+Math.floor(cellSize*.38)+'px sans-serif';ctx.textAlign='center';ctx.fillText(String(i).padStart(2,'0'),cx+cellSize/2,cy+cellSize*.65);}}
-drawSection(stateBottom,padding,padding,gridW,'เบอร์เงินสด (2ตัวล่าง)',false);drawSection(stateTop,padding+gridW+gap,padding,gridW,'เบอร์เงินสด (2ตัวบน)',true);document.getElementById('exportImg').src=canvas.toDataURL('image/png');document.getElementById('exportOverlay').style.display='flex';}
+async function exportImage(){
+  const btn=document.querySelector('.btn-blue');
+  btn.disabled=true;btn.textContent='⏳ กำลังสร้างภาพ...';
+  try{
+    const el=document.querySelector('.grids');
+    const cvs=await html2canvas(el,{
+      scale:2,backgroundColor:'#f5f0e8',useCORS:true,logging:false,
+      onclone:(doc)=>{
+        const g=doc.querySelector('.grids');
+        g.style.flexDirection='row';
+        g.style.flexWrap='nowrap';
+        g.style.maxWidth='none';
+        g.style.gap='20px';
+        doc.querySelectorAll('.section').forEach(s=>{
+          s.style.flex='0 0 460px';
+          s.style.minWidth='460px';
+        });
+        doc.querySelectorAll('.cell').forEach(c=>{
+          c.style.fontSize='0.82rem';
+        });
+      }
+    });
+    document.getElementById('exportImg').src=cvs.toDataURL('image/png');
+    document.getElementById('exportOverlay').style.display='flex';
+  }catch(e){alert('เกิดข้อผิดพลาด: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='📤 ส่งออกเป็นภาพ';}
+}
 loadState();
 </script>
 </body>
