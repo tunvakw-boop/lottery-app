@@ -181,19 +181,12 @@ async function exportImage(){
     const el=document.querySelector('.grids');
     const cvs=await html2canvas(el,{
       scale:2,backgroundColor:'#f5f0e8',useCORS:true,logging:false,
+      windowWidth:1000,
       onclone:(doc)=>{
         const g=doc.querySelector('.grids');
         g.style.flexDirection='row';
         g.style.flexWrap='nowrap';
         g.style.maxWidth='none';
-        g.style.gap='20px';
-        doc.querySelectorAll('.section').forEach(s=>{
-          s.style.flex='0 0 460px';
-          s.style.minWidth='460px';
-        });
-        doc.querySelectorAll('.cell').forEach(c=>{
-          c.style.fontSize='0.82rem';
-        });
       }
     });
     document.getElementById('exportImg').src=cvs.toDataURL('image/png');
