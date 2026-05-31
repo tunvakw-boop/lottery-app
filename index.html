@@ -176,24 +176,51 @@ document.getElementById('dateInput').addEventListener('change',e=>{dateVal=e.tar
 function confirmReset(){document.getElementById('resetModal').style.display='flex';}
 function closeModal(){document.getElementById('resetModal').style.display='none';}
 function doReset(){stateBottom=new Array(100).fill(false);stateTop=new Array(100).fill(false);closeModal();renderAll();save();}
-async function exportImage(){
+function exportImage(){
   const btn=document.querySelector('.btn-blue');
   btn.disabled=true;btn.textContent='⏳ กำลังสร้างภาพ...';
   try{
-    // สร้าง container ขนาดแน่นอน 988px (24+460+20+460+24) วางนอกหน้าจอ
-    const wrap=document.createElement('div');
-    wrap.style.cssText='position:fixed;top:0;left:-2000px;width:988px;box-sizing:border-box;background:#f5f0e8;padding:24px;display:flex;flex-direction:row;gap:20px;font-family:Sarabun,sans-serif;';
-    document.querySelector('.grids').querySelectorAll('.section').forEach(sec=>{
-      const clone=sec.cloneNode(true);
-      clone.style.cssText=(clone.getAttribute('style')||'')+';flex:0 0 460px;width:460px;min-width:460px;max-width:460px;';
-      const footer=clone.querySelector('.sec-footer');
-      if(footer){footer.textContent='ขอบคุณที่ใช้บริการค่ะ';footer.style.cssText='text-align:center;font-size:.82rem;padding:8px;border-top:1px solid #eee;font-weight:700;color:#555;';}
-      wrap.appendChild(clone);
-    });
-    document.body.appendChild(wrap);
-    const cvs=await html2canvas(wrap,{scale:2,backgroundColor:'#f5f0e8',useCORS:true,logging:false,windowWidth:1200});
-    document.body.removeChild(wrap);
-    document.getElementById('exportImg').src=cvs.toDataURL('image/png');
+    const dt=formatThaiDate(dateVal);
+    const PAD=32,SEC=460,GAP=24,CEL=(SEC-4)/10;
+    const HDR=84,SUB=28,CGRID=CEL*10,FTR=34;
+    const W=PAD*2+SEC*2+GAP,H=PAD*2+HDR+SUB+CGRID+FTR;
+    const canvas=document.createElement('canvas');
+    canvas.width=W*2;canvas.height=H*2;
+    const ctx=canvas.getContext('2d');
+    ctx.scale(2,2);
+    ctx.fillStyle='#f5f0e8';ctx.fillRect(0,0,W,H);
+    function drawSection(state,x,y,label,isTop){
+      const hBg=isTop?'#fce4ec':'#d4edda',sBg=isTop?'#f8bbd0':'#a8d5b5',bdr=isTop?'#e91e8c':'#6db98a';
+      const TH=HDR+SUB+CGRID+FTR,cx=x+SEC/2;
+      ctx.fillStyle='white';ctx.fillRect(x,y,SEC,TH);
+      ctx.fillStyle=hBg;ctx.fillRect(x+1,y+1,SEC-2,HDR-1);
+      ctx.strokeStyle=bdr;ctx.lineWidth=2;ctx.strokeRect(x,y,SEC,TH);
+      ctx.textAlign='center';
+      ctx.fillStyle='#222';ctx.font='bold 14px sans-serif';ctx.fillText(label,cx,y+19);
+      ctx.fillStyle='#333';ctx.font='12px sans-serif';ctx.fillText('งวดวันที่ '+dt,cx,y+36);
+      ctx.fillStyle='#555';ctx.font='11px sans-serif';ctx.fillText('เบอร์ละ 100 บาท',cx,y+52);
+      ctx.fillStyle='#c62828';ctx.font='bold 11px sans-serif';ctx.fillText('***เงินสด 7,100 บาท***',cx,y+68);
+      ctx.fillStyle=sBg;ctx.fillRect(x+1,y+HDR,SEC-2,SUB);
+      ctx.strokeStyle='#ccc';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(x+1,y+HDR);ctx.lineTo(x+SEC-1,y+HDR);ctx.stroke();
+      ctx.fillStyle='#444';ctx.font='bold 10px sans-serif';
+      ctx.fillText('เบอร์ละ 100 บาท ***เงินสด 7,100 บาท***',cx,y+HDR+18);
+      for(let i=0;i<100;i++){
+        const col=i%10,row=Math.floor(i/10),gx=x+2+col*CEL,gy=y+HDR+SUB+row*CEL;
+        ctx.fillStyle=state[i]?soldColor.bg:'#fff';ctx.fillRect(gx,gy,CEL,CEL);
+        ctx.strokeStyle='#ddd';ctx.lineWidth=0.5;ctx.strokeRect(gx,gy,CEL,CEL);
+        ctx.fillStyle=state[i]?soldColor.text:'#333';
+        ctx.font='bold '+Math.floor(CEL*0.4)+'px sans-serif';ctx.textAlign='center';
+        ctx.fillText(String(i).padStart(2,'0'),gx+CEL/2,gy+CEL*0.67);
+      }
+      ctx.strokeStyle='#eee';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(x+1,y+HDR+SUB+CGRID);ctx.lineTo(x+SEC-1,y+HDR+SUB+CGRID);ctx.stroke();
+      ctx.fillStyle='#555';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+      ctx.fillText('ขอบคุณที่ใช้บริการค่ะ',cx,y+HDR+SUB+CGRID+22);
+    }
+    drawSection(stateBottom,PAD,PAD,'เบอร์เงินสด (2ตัวล่าง)',false);
+    drawSection(stateTop,PAD+SEC+GAP,PAD,'เบอร์เงินสด (2ตัวบน)',true);
+    document.getElementById('exportImg').src=canvas.toDataURL('image/png');
     document.getElementById('exportOverlay').style.display='flex';
   }catch(e){alert('เกิดข้อผิดพลาด: '+e.message);}
   finally{btn.disabled=false;btn.textContent='📤 ส่งออกเป็นภาพ';}
