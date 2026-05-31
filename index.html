@@ -180,24 +180,19 @@ async function exportImage(){
   const btn=document.querySelector('.btn-blue');
   btn.disabled=true;btn.textContent='⏳ กำลังสร้างภาพ...';
   try{
-    const el=document.querySelector('.grids');
-    const cvs=await html2canvas(el,{
-      scale:2,backgroundColor:'#f5f0e8',useCORS:true,logging:false,
-      windowWidth:1000,
-      onclone:(doc)=>{
-        const g=doc.querySelector('.grids');
-        g.style.flexDirection='row';
-        g.style.flexWrap='nowrap';
-        g.style.maxWidth='none';
-        g.style.padding='24px';
-        g.style.background='#f5f0e8';
-        doc.querySelectorAll('.sec-footer').forEach(f=>{
-          f.innerHTML='ขอบคุณที่ใช้บริการค่ะ';
-          f.style.fontWeight='700';
-          f.style.color='#555';
-        });
-      }
+    // สร้าง container ขนาดแน่นอน 988px (24+460+20+460+24) วางนอกหน้าจอ
+    const wrap=document.createElement('div');
+    wrap.style.cssText='position:fixed;top:0;left:-2000px;width:988px;box-sizing:border-box;background:#f5f0e8;padding:24px;display:flex;flex-direction:row;gap:20px;font-family:Sarabun,sans-serif;';
+    document.querySelector('.grids').querySelectorAll('.section').forEach(sec=>{
+      const clone=sec.cloneNode(true);
+      clone.style.cssText=(clone.getAttribute('style')||'')+';flex:0 0 460px;width:460px;min-width:460px;max-width:460px;';
+      const footer=clone.querySelector('.sec-footer');
+      if(footer){footer.textContent='ขอบคุณที่ใช้บริการค่ะ';footer.style.cssText='text-align:center;font-size:.82rem;padding:8px;border-top:1px solid #eee;font-weight:700;color:#555;';}
+      wrap.appendChild(clone);
     });
+    document.body.appendChild(wrap);
+    const cvs=await html2canvas(wrap,{scale:2,backgroundColor:'#f5f0e8',useCORS:true,logging:false,windowWidth:1200});
+    document.body.removeChild(wrap);
     document.getElementById('exportImg').src=cvs.toDataURL('image/png');
     document.getElementById('exportOverlay').style.display='flex';
   }catch(e){alert('เกิดข้อผิดพลาด: '+e.message);}
