@@ -38,8 +38,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#f5f0e8">
 
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;font-family:'Sarabun',sans-serif}
     body{background:#f5f0e8;min-height:100vh;padding:20px 16px}
@@ -176,9 +176,10 @@ document.getElementById('dateInput').addEventListener('change',e=>{dateVal=e.tar
 function confirmReset(){document.getElementById('resetModal').style.display='flex';}
 function closeModal(){document.getElementById('resetModal').style.display='none';}
 function doReset(){stateBottom=new Array(100).fill(false);stateTop=new Array(100).fill(false);closeModal();renderAll();save();}
-function exportImage(){
+async function exportImage(){
   const btn=document.querySelector('.btn-blue');
   btn.disabled=true;btn.textContent='⏳ กำลังสร้างภาพ...';
+  await document.fonts.ready;
   try{
     const dt=formatThaiDate(dateVal);
     const PAD=32,SEC=460,GAP=24,CEL=(SEC-4)/10;
@@ -203,25 +204,25 @@ function exportImage(){
       ctx.fillStyle=hBg;ctx.fillRect(x+1,y+1,SEC-2,HDR-1);
       ctx.strokeStyle=bdr;ctx.lineWidth=2;ctx.strokeRect(x,y,SEC,TH);
       ctx.textAlign='center';
-      ctx.fillStyle='#222';fitText(label+' งวดวันที่ '+dt,cx,y+20,maxTW,'bold 13px sans-serif');
-      ctx.fillStyle='#555';ctx.font='12px sans-serif';ctx.fillText('เบอร์ละ 100 บาท',cx,y+38);
-      ctx.fillStyle='#c62828';ctx.font='bold 12px sans-serif';ctx.fillText('***เงินสด 7,100 บาท***',cx,y+54);
+      ctx.fillStyle='#222';fitText(label+' งวดวันที่ '+dt,cx,y+20,maxTW,'bold 13px Sarabun');
+      ctx.fillStyle='#555';ctx.font='12px Sarabun';ctx.fillText('เบอร์ละ 100 บาท',cx,y+38);
+      ctx.fillStyle='#c62828';ctx.font='bold 12px Sarabun';ctx.fillText('***เงินสด 7,100 บาท***',cx,y+54);
       ctx.fillStyle=sBg;ctx.fillRect(x+1,y+HDR,SEC-2,SUB);
       ctx.strokeStyle='#ccc';ctx.lineWidth=1;
       ctx.beginPath();ctx.moveTo(x+1,y+HDR);ctx.lineTo(x+SEC-1,y+HDR);ctx.stroke();
-      ctx.fillStyle='#444';ctx.font='bold 10px sans-serif';
+      ctx.fillStyle='#444';ctx.font='bold 10px Sarabun';
       ctx.fillText('เบอร์ละ 100 บาท ***เงินสด 7,100 บาท***',cx,y+HDR+18);
       for(let i=0;i<100;i++){
         const col=i%10,row=Math.floor(i/10),gx=x+2+col*CEL,gy=y+HDR+SUB+row*CEL;
         ctx.fillStyle=state[i]?soldColor.bg:'#fff';ctx.fillRect(gx,gy,CEL,CEL);
         ctx.strokeStyle='#ddd';ctx.lineWidth=0.5;ctx.strokeRect(gx,gy,CEL,CEL);
         ctx.fillStyle=state[i]?soldColor.text:'#333';
-        ctx.font='bold '+Math.floor(CEL*0.4)+'px sans-serif';ctx.textAlign='center';
+        ctx.font='bold '+Math.floor(CEL*0.4)+'px Sarabun';ctx.textAlign='center';
         ctx.fillText(String(i).padStart(2,'0'),gx+CEL/2,gy+CEL*0.67);
       }
       ctx.strokeStyle='#eee';ctx.lineWidth=1;
       ctx.beginPath();ctx.moveTo(x+1,y+HDR+SUB+CGRID);ctx.lineTo(x+SEC-1,y+HDR+SUB+CGRID);ctx.stroke();
-      ctx.fillStyle='#555';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+      ctx.fillStyle='#555';ctx.font='bold 11px Sarabun';ctx.textAlign='center';
       ctx.fillText('ขอบคุณที่ใช้บริการค่ะ',cx,y+HDR+SUB+CGRID+22);
     }
     drawSection(stateBottom,PAD,PAD,'เบอร์เงินสด (2ตัวล่าง)',false);
