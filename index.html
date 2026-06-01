@@ -39,6 +39,7 @@
   <meta name="theme-color" content="#f5f0e8">
 
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;font-family:'Sarabun',sans-serif}
@@ -179,64 +180,37 @@ function doReset(){stateBottom=new Array(100).fill(false);stateTop=new Array(100
 async function exportImage(){
   const btn=document.querySelector('.btn-blue');
   btn.disabled=true;btn.textContent='⏳ กำลังสร้างภาพ...';
-  // โหลด Sarabun โดยตรง รอสูงสุด 3 วิ ก่อนวาด canvas
-  try{await Promise.race([document.fonts.load('bold 13px Sarabun'),new Promise(r=>setTimeout(r,3000))]);}catch(e){}
+  const grids=document.querySelector('.grids');
+  const sects=[...document.querySelectorAll('.section')];
+  const ftrs=[...document.querySelectorAll('.sec-footer')];
+  const fh=ftrs.map(f=>f.innerHTML);
+  // บังคับ layout แนวนอน 2 คอลัมน์ก่อนแคป DOM
+  grids.style.flexDirection='row';
+  grids.style.flexWrap='nowrap';
+  grids.style.maxWidth='none';
+  grids.style.width='fit-content';
+  grids.style.padding='32px';
+  grids.style.background='#f5f0e8';
+  grids.style.borderRadius='16px';
+  sects.forEach(s=>{s.style.flex='none';s.style.width='460px';s.style.minWidth='460px';s.style.maxWidth='460px';});
+  ftrs.forEach(f=>{f.innerHTML='<b>ขอบคุณที่ใช้บริการค่ะ</b>';});
   try{
-    const dt=formatThaiDate(dateVal);
-    const PAD=32,SEC=460,GAP=24,CEL=(SEC-4)/10;
-    const HDR=62,SUB=28,CGRID=CEL*10,FTR=34;
-    const W=PAD*2+SEC*2+GAP,H=PAD*2+HDR+SUB+CGRID+FTR;
-    const canvas=document.createElement('canvas');
-    canvas.width=W*2;canvas.height=H*2;
-    const ctx=canvas.getContext('2d');
-    ctx.scale(2,2);
-    ctx.fillStyle='#f5f0e8';ctx.fillRect(0,0,W,H);
-    // reset transform ก่อนวัด → ป้องกัน iOS Safari เอา scale(2,2) ไปคิดใน measureText
-    function fitText(text,x,y,maxW,font){
-      let m=font.match(/(\d+)px/);let size=m?parseInt(m[1]):12;
-      ctx.save();
-      ctx.setTransform(1,0,0,1,0,0); // identity: measureText ไม่มี scale เข้ามาเกี่ยว
-      ctx.font=font;
-      while(ctx.measureText(text).width>maxW&&size>7){size--;ctx.font=font.replace(/\d+px/,size+'px');}
-      const ff=ctx.font;
-      ctx.restore(); // คืน scale(2,2) และ state เดิม
-      ctx.font=ff;   // ใส่ font ที่วัดได้กลับเข้าไป
-      ctx.fillText(text,x,y);
-    }
-    function drawSection(state,x,y,label,isTop){
-      const hBg=isTop?'#fce4ec':'#d4edda',sBg=isTop?'#f8bbd0':'#a8d5b5',bdr=isTop?'#e91e8c':'#6db98a';
-      const TH=HDR+SUB+CGRID+FTR,cx=x+SEC/2,maxTW=SEC-20;
-      ctx.fillStyle='white';ctx.fillRect(x,y,SEC,TH);
-      ctx.fillStyle=hBg;ctx.fillRect(x+1,y+1,SEC-2,HDR-1);
-      ctx.strokeStyle=bdr;ctx.lineWidth=2;ctx.strokeRect(x,y,SEC,TH);
-      ctx.textAlign='center';
-      ctx.fillStyle='#222';fitText(label+' งวดวันที่ '+dt,cx,y+20,maxTW,'bold 13px Sarabun');
-      ctx.fillStyle='#555';ctx.font='12px Sarabun';ctx.fillText('เบอร์ละ 100 บาท',cx,y+38);
-      ctx.fillStyle='#c62828';ctx.font='bold 12px Sarabun';ctx.fillText('***เงินสด 7,100 บาท***',cx,y+54);
-      ctx.fillStyle=sBg;ctx.fillRect(x+1,y+HDR,SEC-2,SUB);
-      ctx.strokeStyle='#ccc';ctx.lineWidth=1;
-      ctx.beginPath();ctx.moveTo(x+1,y+HDR);ctx.lineTo(x+SEC-1,y+HDR);ctx.stroke();
-      ctx.fillStyle='#444';ctx.font='bold 10px Sarabun';
-      ctx.fillText('เบอร์ละ 100 บาท ***เงินสด 7,100 บาท***',cx,y+HDR+18);
-      for(let i=0;i<100;i++){
-        const col=i%10,row=Math.floor(i/10),gx=x+2+col*CEL,gy=y+HDR+SUB+row*CEL;
-        ctx.fillStyle=state[i]?soldColor.bg:'#fff';ctx.fillRect(gx,gy,CEL,CEL);
-        ctx.strokeStyle='#ddd';ctx.lineWidth=0.5;ctx.strokeRect(gx,gy,CEL,CEL);
-        ctx.fillStyle=state[i]?soldColor.text:'#333';
-        ctx.font='bold '+Math.floor(CEL*0.4)+'px Sarabun';ctx.textAlign='center';
-        ctx.fillText(String(i).padStart(2,'0'),gx+CEL/2,gy+CEL*0.67);
-      }
-      ctx.strokeStyle='#eee';ctx.lineWidth=1;
-      ctx.beginPath();ctx.moveTo(x+1,y+HDR+SUB+CGRID);ctx.lineTo(x+SEC-1,y+HDR+SUB+CGRID);ctx.stroke();
-      ctx.fillStyle='#555';ctx.font='bold 11px Sarabun';ctx.textAlign='center';
-      ctx.fillText('ขอบคุณที่ใช้บริการค่ะ',cx,y+HDR+SUB+CGRID+22);
-    }
-    drawSection(stateBottom,PAD,PAD,'เบอร์เงินสด (2ตัวล่าง)',false);
-    drawSection(stateTop,PAD+SEC+GAP,PAD,'เบอร์เงินสด (2ตัวบน)',true);
+    // รอ 2 frame ให้ browser จัด layout ก่อนแคป
+    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+    const canvas=await html2canvas(grids,{
+      scale:2,useCORS:true,logging:false,
+      windowWidth:1200,backgroundColor:'#f5f0e8'
+    });
     document.getElementById('exportImg').src=canvas.toDataURL('image/png');
     document.getElementById('exportOverlay').style.display='flex';
   }catch(e){alert('เกิดข้อผิดพลาด: '+e.message);}
-  finally{btn.disabled=false;btn.textContent='📤 ส่งออกเป็นภาพ';}
+  finally{
+    // คืน style เสมอ ไม่ว่าสำเร็จหรือ error
+    ['flexDirection','flexWrap','maxWidth','width','padding','background','borderRadius'].forEach(p=>grids.style[p]='');
+    sects.forEach(s=>{s.style.flex='';s.style.width='';s.style.minWidth='';s.style.maxWidth='';});
+    ftrs.forEach((f,i)=>f.innerHTML=fh[i]);
+    btn.disabled=false;btn.textContent='📤 ส่งออกเป็นภาพ';
+  }
 }
 loadState();
 </script>
