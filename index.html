@@ -191,11 +191,16 @@ async function exportImage(){
     const ctx=canvas.getContext('2d');
     ctx.scale(2,2);
     ctx.fillStyle='#f5f0e8';ctx.fillRect(0,0,W,H);
-    // วัดและวาดด้วย ctx เดียวกัน → ใช้ font เดียวกัน 100% ไม่มี mismatch
+    // reset transform ก่อนวัด → ป้องกัน iOS Safari เอา scale(2,2) ไปคิดใน measureText
     function fitText(text,x,y,maxW,font){
       let m=font.match(/(\d+)px/);let size=m?parseInt(m[1]):12;
+      ctx.save();
+      ctx.setTransform(1,0,0,1,0,0); // identity: measureText ไม่มี scale เข้ามาเกี่ยว
       ctx.font=font;
       while(ctx.measureText(text).width>maxW&&size>7){size--;ctx.font=font.replace(/\d+px/,size+'px');}
+      const ff=ctx.font;
+      ctx.restore(); // คืน scale(2,2) และ state เดิม
+      ctx.font=ff;   // ใส่ font ที่วัดได้กลับเข้าไป
       ctx.fillText(text,x,y);
     }
     function drawSection(state,x,y,label,isTop){
