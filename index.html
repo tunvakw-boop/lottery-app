@@ -182,24 +182,30 @@ function exportImage(){
   try{
     const dt=formatThaiDate(dateVal);
     const PAD=32,SEC=460,GAP=24,CEL=(SEC-4)/10;
-    const HDR=84,SUB=28,CGRID=CEL*10,FTR=34;
+    const HDR=62,SUB=28,CGRID=CEL*10,FTR=34;
     const W=PAD*2+SEC*2+GAP,H=PAD*2+HDR+SUB+CGRID+FTR;
     const canvas=document.createElement('canvas');
     canvas.width=W*2;canvas.height=H*2;
     const ctx=canvas.getContext('2d');
     ctx.scale(2,2);
     ctx.fillStyle='#f5f0e8';ctx.fillRect(0,0,W,H);
+    // ใช้ canvas แยกวัดขนาดตัวอักษร (ไม่มี scale 2x) เพื่อความแม่นยำ
+    const mc=document.createElement('canvas').getContext('2d');
+    function fitText(text,x,y,maxW,font){
+      mc.font=font;const m=font.match(/(\d+)px/);let size=m?parseInt(m[1]):12;
+      while(mc.measureText(text).width>maxW&&size>8){size--;mc.font=font.replace(/\d+px/,size+'px');}
+      ctx.font=mc.font;ctx.fillText(text,x,y);
+    }
     function drawSection(state,x,y,label,isTop){
       const hBg=isTop?'#fce4ec':'#d4edda',sBg=isTop?'#f8bbd0':'#a8d5b5',bdr=isTop?'#e91e8c':'#6db98a';
-      const TH=HDR+SUB+CGRID+FTR,cx=x+SEC/2;
+      const TH=HDR+SUB+CGRID+FTR,cx=x+SEC/2,maxTW=SEC-20;
       ctx.fillStyle='white';ctx.fillRect(x,y,SEC,TH);
       ctx.fillStyle=hBg;ctx.fillRect(x+1,y+1,SEC-2,HDR-1);
       ctx.strokeStyle=bdr;ctx.lineWidth=2;ctx.strokeRect(x,y,SEC,TH);
       ctx.textAlign='center';
-      ctx.fillStyle='#222';ctx.font='bold 14px sans-serif';ctx.fillText(label,cx,y+19);
-      ctx.fillStyle='#333';ctx.font='12px sans-serif';ctx.fillText('งวดวันที่ '+dt,cx,y+36);
-      ctx.fillStyle='#555';ctx.font='11px sans-serif';ctx.fillText('เบอร์ละ 100 บาท',cx,y+52);
-      ctx.fillStyle='#c62828';ctx.font='bold 11px sans-serif';ctx.fillText('***เงินสด 7,100 บาท***',cx,y+68);
+      ctx.fillStyle='#222';fitText(label+' งวดวันที่ '+dt,cx,y+20,maxTW,'bold 13px sans-serif');
+      ctx.fillStyle='#555';ctx.font='12px sans-serif';ctx.fillText('เบอร์ละ 100 บาท',cx,y+38);
+      ctx.fillStyle='#c62828';ctx.font='bold 12px sans-serif';ctx.fillText('***เงินสด 7,100 บาท***',cx,y+54);
       ctx.fillStyle=sBg;ctx.fillRect(x+1,y+HDR,SEC-2,SUB);
       ctx.strokeStyle='#ccc';ctx.lineWidth=1;
       ctx.beginPath();ctx.moveTo(x+1,y+HDR);ctx.lineTo(x+SEC-1,y+HDR);ctx.stroke();
