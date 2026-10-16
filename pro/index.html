@@ -66,7 +66,7 @@
     .grid{display:grid;grid-template-columns:repeat(10,1fr);border-top:1px solid #ccc}
     .cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:clamp(.6rem,1.3vw,.86rem);border-right:1px solid #ddd;border-bottom:1px solid #ddd;cursor:pointer;background:white;color:#333;transition:background .1s;user-select:none;position:relative}
     .cell:nth-child(10n){border-right:none}
-    .cell.sold{color:transparent}            /* ขายแล้ว = ถมสีทึบ ไม่โชว์เลข */
+    .cell.sold{color:transparent}
     .cell.sel{outline:3px solid #1976d2;outline-offset:-3px;z-index:2}
     .cell.locked{opacity:.55;cursor:not-allowed;color:transparent}
     .sec-footer{text-align:center;font-size:.8rem;color:#666;padding:6px;border-top:1px solid #eee}
@@ -77,7 +77,6 @@
     .combined-wrap{text-align:center;margin-top:14px}
     .combined-total{font-size:1rem;font-weight:800;color:#333;padding:10px 20px;background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:inline-block}
 
-    /* ===== modal พื้นฐาน ===== */
     .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:999;padding:16px}
     .modal{background:white;border-radius:14px;padding:22px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2);max-width:360px;width:100%}
     .modal h3{font-size:1.1rem;margin-bottom:12px}
@@ -88,7 +87,11 @@
     .btn-ok{padding:9px 22px;border-radius:8px;border:none;background:linear-gradient(135deg,#66bb6a,#388e3c);color:white;cursor:pointer;font-weight:700;font-size:.9rem}
     .btn-confirm{padding:9px 22px;border-radius:8px;border:none;background:linear-gradient(135deg,#ef5350,#e53935);color:white;cursor:pointer;font-weight:700;font-size:.9rem}
 
-    /* ===== สถานะ radio ===== */
+    .sug-box{text-align:left;margin:-6px 0 12px;border:1px solid #eee;border-radius:9px;max-height:168px;overflow:auto;display:none}
+    .sug{padding:9px 12px;cursor:pointer;font-size:.95rem;border-bottom:1px solid #f1f1f1;font-weight:600;color:#333}
+    .sug:last-child{border-bottom:none}
+    .sug:active{background:#eef6ff}
+
     .status-opts{display:flex;flex-direction:column;gap:8px;text-align:left;margin-bottom:12px}
     .status-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid #ddd;border-radius:9px;cursor:pointer;font-weight:600;font-size:.92rem}
     .status-opt input{margin:0}
@@ -98,7 +101,6 @@
     .dot{width:12px;height:12px;border-radius:50%}
     .dot-unpaid{background:#e53935}.dot-paid{background:#43a047}.dot-partial{background:#fb8c00}
 
-    /* ===== floating add bar ===== */
     .addbar{position:fixed;left:0;right:0;bottom:0;background:#1a1a2e;color:white;padding:10px 14px;display:none;z-index:900;box-shadow:0 -4px 16px rgba(0,0,0,.3)}
     .addbar.on{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
     .addbar .info{font-size:.9rem;font-weight:600;flex:1;min-width:150px}
@@ -107,7 +109,6 @@
     .addbar .save{background:#43a047;color:white}
     .addbar .cancel{background:#555;color:white}
 
-    /* ===== รายงาน overlay ===== */
     .report-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-start;justify-content:center;z-index:998;padding:14px;overflow:auto}
     .report-box{background:white;border-radius:14px;padding:16px;max-width:760px;width:100%;margin:auto}
     .report-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap}
@@ -126,7 +127,6 @@
     .rtotals .t-all{color:#333}.rtotals .t-got{color:#2e7d32}.rtotals .t-due{color:#c62828}
     .empty{text-align:center;color:#999;padding:30px 10px;font-size:.95rem}
 
-    /* ===== export overlay ===== */
     .export-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:999;padding:16px}
     .export-box{background:white;border-radius:14px;padding:16px;max-width:95vw;max-height:92vh;overflow:auto;text-align:center}
     .export-hint{font-weight:700;font-size:.95rem;margin-bottom:8px;color:#333}
@@ -157,18 +157,18 @@
   <div class="section" style="border:2px solid #6db98a">
     <div class="sec-header" style="background:#d4edda">
       <div class="sec-title" id="titleBottom">เบอร์เงินสด (2ตัวล่าง) งวดวันที่ ...</div>
-      <div class="sec-sub">เบอร์ละ 100 บาท <span style="color:#c62828">***เงินสด 7,100 บาท***</span></div>
+      <div class="sec-sub">เบอร์ละ 100 บาท <span style="color:#c62828">***เงินสด 7,200 บาท***</span></div>
     </div>
-    <div class="sec-sub2" style="background:#a8d5b5">เบอร์ละ 100 บาท ***เงินสด 7,100 บาท***</div>
+    <div class="sec-sub2" style="background:#a8d5b5">เบอร์ละ 100 บาท ***เงินสด 7,200 บาท***</div>
     <div class="grid" id="gridBottom"></div>
     <div class="sec-footer">ขายแล้ว: <strong id="soldBottom">0</strong> / 100 เลข</div>
   </div>
   <div class="section" style="border:2px solid #e91e8c">
     <div class="sec-header" style="background:#fce4ec">
       <div class="sec-title" id="titleTop">เบอร์เงินสด (2ตัวบน) งวดวันที่ ...</div>
-      <div class="sec-sub">เบอร์ละ 100 บาท <span style="color:#c62828">***เงินสด 7,100 บาท***</span></div>
+      <div class="sec-sub">เบอร์ละ 100 บาท <span style="color:#c62828">***เงินสด 7,200 บาท***</span></div>
     </div>
-    <div class="sec-sub2" style="background:#f8bbd0">เบอร์ละ 100 บาท ***เงินสด 7,100 บาท***</div>
+    <div class="sec-sub2" style="background:#f8bbd0">เบอร์ละ 100 บาท ***เงินสด 7,200 บาท***</div>
     <div class="grid" id="gridTop"></div>
     <div class="sec-footer">ขายแล้ว: <strong id="soldTop">0</strong> / 100 เลข</div>
   </div>
@@ -179,18 +179,17 @@
   <div style="display:flex;align-items:center;gap:6px"><div class="leg-box" style="background:white;border:1px solid #bbb"></div>ว่าง</div>
 </div>
 
-<!-- แถบลอยตอนเพิ่มเลข -->
 <div class="addbar" id="addBar">
   <div class="info">👤 <b id="abName"></b> · เลือก <b id="abCount">0</b> เลข · <b id="abPrice">฿0</b></div>
   <button class="cancel" onclick="cancelAdd()">✕ ยกเลิก</button>
   <button class="save" onclick="openSaveModal()">✓ บันทึก</button>
 </div>
 
-<!-- modal: กรอกชื่อผู้ซื้อ -->
 <div class="modal-bg" id="nameModal">
   <div class="modal">
     <h3>👤 ชื่อผู้ซื้อ</h3>
-    <input type="text" id="nameInput" placeholder="เช่น พี่เมย์, แม่ดวน" autocomplete="off"/>
+    <input type="text" id="nameInput" placeholder="พิมพ์ชื่อ เช่น อาร์ม" autocomplete="off"/>
+    <div class="sug-box" id="nameSuggest"></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeName()">ยกเลิก</button>
       <button class="btn-ok" onclick="confirmName()">ถัดไป →</button>
@@ -198,7 +197,6 @@
   </div>
 </div>
 
-<!-- modal: บันทึกผู้ซื้อ (สถานะ+ยอด+หมายเหตุ) -->
 <div class="modal-bg" id="saveModal">
   <div class="modal">
     <h3 id="smTitle">💾 บันทึกผู้ซื้อ</h3>
@@ -214,7 +212,6 @@
   </div>
 </div>
 
-<!-- modal: ยืนยันรีเซต -->
 <div class="modal-bg" id="resetModal">
   <div class="modal">
     <div style="font-size:2rem;margin-bottom:8px">🔄</div>
@@ -227,7 +224,6 @@
   </div>
 </div>
 
-<!-- รายงาน -->
 <div class="report-bg" id="reportBg">
   <div class="report-box" id="reportBox">
     <div class="report-head">
@@ -241,7 +237,6 @@
   </div>
 </div>
 
-<!-- export overlay -->
 <div class="export-bg" id="exportOverlay">
   <div class="export-box">
     <div class="export-hint">📸 กดค้างที่รูปเพื่อบันทึก (มือถือ) หรือคลิกขวา → Save Image (คอม)</div>
@@ -254,9 +249,11 @@
 /* ===================== CONFIG ===================== */
 const SUPABASE_URL='https://xlsbabusatrlfolkrjmv.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhsc2JhYnVzYXRybGZvbGtyam12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NTQyNzMsImV4cCI6MjA5MjUzMDI3M30.o8VJdMx6RFqOb1X96iJGey-NlHyx6KNFwLkYdq3_YU0';
+const TENANT='friend';             // แยกข้อมูลแต่ละแอปในตารางเดียวกัน
 const PRICE_PER=100;               // ราคาต่อเลข
 const {createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
+function rowId(d){return TENANT+'-'+d;}
 
 const COLORS=[
   {label:'ฟ้า',bg:'#90caf9',text:'#0d47a1'},
@@ -271,26 +268,29 @@ const COLORS=[
 const THAI_MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 
 /* ===================== STATE ===================== */
-let buyers=[];                     // [{id,name,top:[],bottom:[],status,paid,note,ts}]
+let buyers=[];
 let soldColor=COLORS[0];
 let dateVal='';
 let saving=false,pendingSave=false;
-let mode='normal';                 // 'normal' | 'adding'
-let draft=null;                    // {name, top:Set, bottom:Set}
-let editingId=null;                // buyer id ที่กำลังแก้ใน saveModal
+let mode='normal';
+let draft=null;                    // {name, top:Set, bottom:Set, mergeId}
+let editingId=null;
 let smStatusVal='unpaid';
 
-/* วันที่เริ่มต้น = วันนี้ */
 function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
 /* ===================== HELPERS ===================== */
 function hide(id){document.getElementById(id).style.display='none';}
 function show(id){document.getElementById(id).style.display='flex';}
+function reportOpen(){return document.getElementById('reportBg').style.display==='flex';}
 function formatThaiDate(d){if(!d)return'';const[y,m,day]=d.split('-');return parseInt(day)+' '+THAI_MONTHS[parseInt(m)-1]+' '+(parseInt(y)+543);}
 function setStatus(msg,type){const el=document.getElementById('statusMsg');el.textContent=msg;el.className='status-'+type;}
 function priceOf(b){return (b.top.length+b.bottom.length)*PRICE_PER;}
 function ownerOf(grid,n){for(const b of buyers){if((grid==='top'?b.top:b.bottom).includes(n))return b;}return null;}
 function soldCount(grid){const s=new Set();buyers.forEach(b=>(grid==='top'?b.top:b.bottom).forEach(n=>s.add(n)));return s.size;}
+function pad2(n){return String(n).padStart(2,'0');}
+function numStr(arr){return arr.length?arr.map(pad2).join(' '):'-';}
+function saveLast(){try{localStorage.setItem('lastDraw_'+TENANT,dateVal);}catch(e){}}
 
 /* ===================== COLOR SWATCHES ===================== */
 const swatchDiv=document.getElementById('swatches');
@@ -301,7 +301,7 @@ function updateSwatches(){const divs=[...swatchDiv.children];COLORS.forEach((c,i
 function buildGrid(id,grid){
   const g=document.getElementById(id);g.innerHTML='';
   for(let n=0;n<100;n++){
-    const c=document.createElement('div');c.className='cell';c.textContent=String(n).padStart(2,'0');
+    const c=document.createElement('div');c.className='cell';c.textContent=pad2(n);
     const owner=ownerOf(grid,n);
     if(mode==='adding'){
       const selSet=(grid==='top'?draft.top:draft.bottom);
@@ -310,7 +310,7 @@ function buildGrid(id,grid){
       else { c.onclick=()=>toggleSel(grid,n); }
     } else {
       if(owner){ c.classList.add('sold'); c.style.background=soldColor.bg; c.onclick=()=>showBuyer(owner.id); }
-      else { c.onclick=()=>hintAdd(); }
+      else { c.onclick=hintAdd; }
     }
     g.appendChild(c);
   }
@@ -333,21 +333,37 @@ function hintAdd(){ if(mode==='normal') setStatus('กดปุ่ม ➕ เพ
 function startAdd(){
   editingId=null;
   document.getElementById('nameInput').value='';
+  renderNameSuggest();
   show('nameModal');
   setTimeout(()=>document.getElementById('nameInput').focus(),100);
 }
 function closeName(){hide('nameModal');}
+function renderNameSuggest(){
+  const q=document.getElementById('nameInput').value.trim().toLowerCase();
+  const box=document.getElementById('nameSuggest');box.innerHTML='';
+  const names=[...new Set(buyers.map(b=>b.name))];
+  const matches=(q?names.filter(n=>n.toLowerCase().includes(q)):names).slice(0,6);
+  if(matches.length===0){box.style.display='none';return;}
+  matches.forEach(n=>{
+    const b=buyers.find(x=>x.name===n);
+    const d=document.createElement('div');d.className='sug';
+    d.innerHTML='👤 '+n+' <span style="color:#999;font-weight:400;font-size:.8rem">· มีแล้ว '+(b?(b.top.length+b.bottom.length):0)+' เลข</span>';
+    d.onclick=()=>{document.getElementById('nameInput').value=n;box.style.display='none';};
+    box.appendChild(d);
+  });
+  box.style.display='block';
+}
 function confirmName(){
   const name=document.getElementById('nameInput').value.trim();
   if(!name){alert('กรุณากรอกชื่อผู้ซื้อ');return;}
   hide('nameModal');
-  draft={name,top:new Set(),bottom:new Set()};
+  const existing=buyers.find(b=>b.name.trim().toLowerCase()===name.toLowerCase());
+  draft={name:existing?existing.name:name,top:new Set(),bottom:new Set(),mergeId:existing?existing.id:null};
   mode='adding';
-  document.getElementById('abName').textContent=name;
+  document.getElementById('abName').textContent=draft.name+(existing?' (รวมยอดเดิม)':'');
   document.getElementById('addBar').classList.add('on');
-  renderAll();
-  updateAddBar();
-  setStatus('เลือกเลขบนตาราง บน/ล่าง ได้เลย','loading');
+  renderAll();updateAddBar();
+  setStatus(existing?('เพิ่มเลขให้ '+draft.name+' (เลขเดิมล็อกไว้แล้ว)'):'เลือกเลขบนตาราง บน/ล่าง ได้เลย','loading');
   window.scrollTo({top:document.querySelector('.grids').offsetTop-70,behavior:'smooth'});
 }
 function toggleSel(grid,n){
@@ -367,30 +383,33 @@ function cancelAdd(){
 }
 
 /* ===== save modal ===== */
-function statusOptHTML(val,label,cls){
+function statusOptHTML(val,label){
   return '<label class="status-opt" data-v="'+val+'"><input type="radio" name="st" value="'+val+'"><span class="dot dot-'+val+'"></span>'+label+'</label>';
 }
 function openSaveModal(){
   const cnt=draft.top.size+draft.bottom.size;
   if(cnt===0){alert('ยังไม่ได้เลือกเลข');return;}
-  buildSaveModal({name:draft.name,top:[...draft.top],bottom:[...draft.bottom]},false);
+  if(draft.mergeId){
+    const b=buyers.find(x=>x.id===draft.mergeId)||{top:[],bottom:[],status:'unpaid',paid:0,note:''};
+    const top=[...new Set([...b.top,...draft.top])].sort((x,y)=>x-y);
+    const bottom=[...new Set([...b.bottom,...draft.bottom])].sort((x,y)=>x-y);
+    buildSaveModal({name:draft.name,top,bottom,status:b.status,paid:b.paid,note:b.note||''},{prefill:true,allowDelete:false,title:'🔗 รวมยอด '+draft.name});
+  }else{
+    buildSaveModal({name:draft.name,top:[...draft.top].sort((x,y)=>x-y),bottom:[...draft.bottom].sort((x,y)=>x-y)},{title:'💾 บันทึกผู้ซื้อ'});
+  }
 }
-function buildSaveModal(data,isEdit){
-  document.getElementById('smTitle').textContent=isEdit?'✏️ แก้ไขผู้ซื้อ':'💾 บันทึกผู้ซื้อ';
+function buildSaveModal(data,opts){
+  opts=opts||{};
+  document.getElementById('smTitle').textContent=opts.title||'💾 บันทึกผู้ซื้อ';
   const total=(data.top.length+data.bottom.length)*PRICE_PER;
-  const topS=data.top.length?data.top.map(n=>String(n).padStart(2,'0')).join(' '):'-';
-  const botS=data.bottom.length?data.bottom.map(n=>String(n).padStart(2,'0')).join(' '):'-';
-  document.getElementById('smSummary').innerHTML='👤 <b>'+data.name+'</b><br>บน: '+topS+'<br>ล่าง: '+botS+'<br><b style="color:#1565c0">รวม ฿'+total.toLocaleString()+'</b>';
+  document.getElementById('smSummary').innerHTML='👤 <b>'+data.name+'</b><br>บน: '+numStr(data.top)+'<br>ล่าง: '+numStr(data.bottom)+'<br><b style="color:#1565c0">รวม ฿'+total.toLocaleString()+'</b>';
   const wrap=document.getElementById('smStatus');
   wrap.innerHTML=statusOptHTML('unpaid','ยังไม่จ่าย')+statusOptHTML('paid','จ่ายแล้ว')+statusOptHTML('partial','จ่ายบางส่วน');
-  smStatusVal=isEdit?data.status:'unpaid';
-  [...wrap.querySelectorAll('.status-opt')].forEach(el=>{
-    el.onclick=()=>{el.querySelector('input').checked=true;setSmStatus(el.dataset.v);};
-  });
-  document.getElementById('paidInput').value=(isEdit&&data.paid)?data.paid:'';
-  document.getElementById('noteInput').value=isEdit?(data.note||''):'';
-  document.getElementById('smDelBtn').style.display=isEdit?'block':'none';
-  setSmStatus(smStatusVal);
+  [...wrap.querySelectorAll('.status-opt')].forEach(el=>{el.onclick=()=>{setSmStatus(el.dataset.v);};});
+  document.getElementById('paidInput').value=(opts.prefill&&data.paid)?data.paid:'';
+  document.getElementById('noteInput').value=opts.prefill?(data.note||''):'';
+  document.getElementById('smDelBtn').style.display=opts.allowDelete?'block':'none';
+  setSmStatus(opts.prefill?(data.status||'unpaid'):'unpaid');
   show('saveModal');
 }
 function setSmStatus(v){
@@ -413,8 +432,16 @@ function commitBuyer(){
   if(editingId){
     const b=buyers.find(x=>x.id===editingId);
     if(b){b.status=smStatusVal;b.paid=(smStatusVal==='paid')?priceOf(b):(smStatusVal==='partial'?paid:0);b.note=note;}
-  } else {
-    const b={id:'b'+Date.now()+Math.floor(Math.random()*1000),name:draft.name,top:[...draft.top].sort((a,b)=>a-b),bottom:[...draft.bottom].sort((a,b)=>a-b),status:smStatusVal,paid:0,note,ts:Date.now()};
+  }else if(draft&&draft.mergeId){
+    const b=buyers.find(x=>x.id===draft.mergeId);
+    if(b){
+      b.top=[...new Set([...b.top,...draft.top])].sort((x,y)=>x-y);
+      b.bottom=[...new Set([...b.bottom,...draft.bottom])].sort((x,y)=>x-y);
+      b.status=smStatusVal;b.note=note;
+      b.paid=(smStatusVal==='paid')?priceOf(b):(smStatusVal==='partial'?paid:0);
+    }
+  }else{
+    const b={id:'b'+Date.now()+Math.floor(Math.random()*1000),name:draft.name,top:[...draft.top].sort((x,y)=>x-y),bottom:[...draft.bottom].sort((x,y)=>x-y),status:smStatusVal,paid:0,note,ts:Date.now()};
     b.paid=(smStatusVal==='paid')?priceOf(b):(smStatusVal==='partial'?paid:0);
     buyers.push(b);
   }
@@ -422,15 +449,15 @@ function commitBuyer(){
   mode='normal';draft=null;editingId=null;
   document.getElementById('addBar').classList.remove('on');
   renderAll();save();
-  if(document.getElementById('reportBg').style.display==='flex')renderReport();
-  setStatus('บันทึกผู้ซื้อแล้ว ✓','ok');
+  if(reportOpen())renderReport();
+  setStatus('บันทึกแล้ว ✓','ok');
 }
 
 /* ===== แตะเลขที่ขายแล้ว / แก้ไขจากรายงาน ===== */
 function showBuyer(id){
   const b=buyers.find(x=>x.id===id);if(!b)return;
-  editingId=id;
-  buildSaveModal(b,true);
+  editingId=id;draft=null;
+  buildSaveModal(b,{prefill:true,allowDelete:true,title:'✏️ แก้ไขผู้ซื้อ'});
 }
 function deleteEditing(){
   if(!editingId)return;
@@ -439,7 +466,7 @@ function deleteEditing(){
   buyers=buyers.filter(x=>x.id!==editingId);
   editingId=null;hide('saveModal');
   renderAll();save();
-  if(document.getElementById('reportBg').style.display==='flex')renderReport();
+  if(reportOpen())renderReport();
   setStatus('ลบผู้ซื้อแล้ว','ok');
 }
 
@@ -450,20 +477,17 @@ function renderReport(){
   const body=document.getElementById('reportBody');
   if(buyers.length===0){body.innerHTML='<div class="empty">ยังไม่มีผู้ซื้อในงวดนี้</div>';return;}
   const chip={unpaid:'<span class="chip chip-unpaid">ยังไม่จ่าย</span>',paid:'<span class="chip chip-paid">จ่ายแล้ว</span>',partial:'<span class="chip chip-partial">จ่ายบางส่วน</span>'};
-  let all=0,got=0;
-  let rows='';
+  let all=0,got=0,rows='';
   buyers.forEach((b,i)=>{
     const t=priceOf(b);all+=t;
     const g=b.status==='paid'?t:(b.status==='partial'?(b.paid||0):0);got+=g;
-    const topS=b.top.length?b.top.map(n=>String(n).padStart(2,'0')).join(' '):'-';
-    const botS=b.bottom.length?b.bottom.map(n=>String(n).padStart(2,'0')).join(' '):'-';
-    let st=chip[b.status];
+    let st=chip[b.status]||'';
     if(b.status==='partial')st+='<br><span style="font-size:.72rem;color:#e65100">จ่าย '+(b.paid||0).toLocaleString()+'/'+t.toLocaleString()+'</span>';
     const note=b.note?('<br><span style="font-size:.72rem;color:#888">📝 '+b.note+'</span>'):'';
     rows+='<tr>'
       +'<td style="text-align:center">'+(i+1)+'</td>'
       +'<td><b>'+b.name+'</b>'+note+'</td>'
-      +'<td class="num">บน: '+topS+'<br><span class="numl">ล่าง: '+botS+'</span></td>'
+      +'<td class="num">บน: '+numStr(b.top)+'<br><span class="numl">ล่าง: '+numStr(b.bottom)+'</span></td>'
       +'<td style="text-align:center">'+st+'</td>'
       +'<td style="text-align:right;font-weight:700">'+t.toLocaleString()+'</td>'
       +'<td style="text-align:center"><span class="act" onclick="showBuyer(\''+b.id+'\')">แก้ไข</span></td>'
@@ -480,27 +504,26 @@ function renderReport(){
     +'</div>';
 }
 
-/* ===================== SUPABASE SYNC (ต่องวด) ===================== */
+/* ===================== SUPABASE SYNC (ต่องวด + tenant) ===================== */
 async function save(){
   if(saving){pendingSave=true;return;}
   saving=true;setStatus('💾 กำลังบันทึก...','loading');
   try{
-    const{error}=await db.from('lottery_draws').upsert({id:dateVal,buyers,sold_color:soldColor.label,updated_at:new Date().toISOString()});
+    const{error}=await db.from('lottery_draws').upsert({id:rowId(dateVal),buyers,sold_color:soldColor.label,updated_at:new Date().toISOString()});
     if(error)throw error;
+    saveLast();
     setStatus('✅ บันทึกแล้ว — ทุกคนเห็นข้อมูลเดียวกัน','ok');
   }catch(e){setStatus('❌ บันทึกไม่สำเร็จ: '+e.message,'err');}
   saving=false;if(pendingSave){pendingSave=false;save();}
 }
 async function loadDraw(d){
   setStatus('⏳ กำลังโหลดงวด '+formatThaiDate(d)+'...','loading');
-  const{data,error}=await db.from('lottery_draws').select('*').eq('id',d).maybeSingle();
+  const{data,error}=await db.from('lottery_draws').select('*').eq('id',rowId(d)).maybeSingle();
   if(error){setStatus('❌ โหลดไม่สำเร็จ: '+error.message,'err');return;}
   if(data){
     buyers=Array.isArray(data.buyers)?data.buyers:[];
     soldColor=COLORS.find(c=>c.label===data.sold_color)||COLORS[0];
-  }else{
-    buyers=[];
-  }
+  }else{buyers=[];}
   renderAll();
   setStatus('✅ พร้อมใช้งาน — ซิงค์เรียลไทม์','ok');
 }
@@ -508,15 +531,16 @@ async function loadDraw(d){
 let channel=null;
 function subscribe(){
   if(channel)db.removeChannel(channel);
-  channel=db.channel('draw-'+dateVal)
-    .on('postgres_changes',{event:'*',schema:'public',table:'lottery_draws',filter:'id=eq.'+dateVal},(payload)=>{
-      if(mode==='adding')return; // อย่ารบกวนตอนกำลังเพิ่มเลข
+  const rid=rowId(dateVal);
+  channel=db.channel('draw-'+rid)
+    .on('postgres_changes',{event:'*',schema:'public',table:'lottery_draws',filter:'id=eq.'+rid},(payload)=>{
+      if(mode==='adding')return;
       const d=payload.new;
-      if(!d||d.id!==dateVal)return;
+      if(!d||d.id!==rid)return;
       buyers=Array.isArray(d.buyers)?d.buyers:[];
       soldColor=COLORS.find(c=>c.label===d.sold_color)||soldColor;
       renderAll();
-      if(document.getElementById('reportBg').style.display==='flex')renderReport();
+      if(reportOpen())renderReport();
       setStatus('🔄 รับข้อมูลอัปเดตจากอุปกรณ์อื่น','ok');
     }).subscribe();
 }
@@ -524,10 +548,11 @@ function subscribe(){
 /* ===== เปลี่ยนงวด ===== */
 document.getElementById('dateInput').addEventListener('change',async e=>{
   if(mode==='adding')cancelAdd();
-  dateVal=e.target.value;
-  await loadDraw(dateVal);
-  subscribe();
+  dateVal=e.target.value;saveLast();
+  await loadDraw(dateVal);subscribe();
 });
+/* ===== autocomplete ชื่อ ===== */
+document.getElementById('nameInput').addEventListener('input',renderNameSuggest);
 
 /* ===================== RESET ===================== */
 function confirmReset(){show('resetModal');}
@@ -535,7 +560,6 @@ function doReset(){buyers=[];hide('resetModal');renderAll();save();setStatus('�
 
 /* ===================== EXPORT IMAGE (ตาราง) ===================== */
 async function exportImage(){
-  const btn=document.querySelector('.btn-blue');
   const grids=document.querySelector('.grids');
   const sects=[...document.querySelectorAll('.section')];
   grids.style.flexDirection='row';grids.style.flexWrap='nowrap';grids.style.maxWidth='none';
@@ -552,25 +576,30 @@ async function exportImage(){
     sects.forEach(s=>{s.style.flex='';s.style.width='';s.style.minWidth='';s.style.maxWidth='';});
   }
 }
-
-/* ===== EXPORT รายงาน ===== */
 async function exportReport(){
   if(buyers.length===0){alert('ยังไม่มีผู้ซื้อในงวดนี้');return;}
   const box=document.getElementById('reportBox');
-  const prevBg=document.getElementById('reportBg').style.background;
-  document.getElementById('reportBg').style.background='#fff';
+  const bg=document.getElementById('reportBg');const prev=bg.style.background;bg.style.background='#fff';
   try{
     await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
     const canvas=await html2canvas(box,{scale:2,useCORS:true,logging:false,backgroundColor:'#ffffff'});
     document.getElementById('exportImg').src=canvas.toDataURL('image/png');
     show('exportOverlay');
   }catch(e){alert('เกิดข้อผิดพลาด: '+e.message);}
-  finally{document.getElementById('reportBg').style.background=prevBg;}
+  finally{bg.style.background=prev;}
 }
 
 /* ===================== INIT ===================== */
+async function initialDate(){
+  try{const ls=localStorage.getItem('lastDraw_'+TENANT);if(ls)return ls;}catch(e){}
+  try{
+    const{data}=await db.from('lottery_draws').select('id').like('id',TENANT+'-%').order('updated_at',{ascending:false}).limit(1);
+    if(data&&data[0])return data[0].id.slice((TENANT+'-').length);
+  }catch(e){}
+  return todayStr();
+}
 (async function init(){
-  dateVal=todayStr();
+  dateVal=await initialDate();
   document.getElementById('dateInput').value=dateVal;
   await loadDraw(dateVal);
   subscribe();
