@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+  <title>กันเลขระเบิด</title>
+
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <script>
+  (function(){
+    var manifest = {
+      name: 'กันเลขระเบิด',
+      short_name: 'กันเลขระเบิด',
+      start_url: '.',
+      display: 'standalone',
+      background_color: '#2a2a4a',
+      theme_color: '#2a2a4a',
+      icons: [
+        {src: 'icon.png', sizes: '192x192', type: 'image/png'},
+        {src: 'icon.png', sizes: '512x512', type: 'image/png'}
+      ]
+    };
+    var mLink = document.createElement('link');
+    mLink.rel = 'manifest';
+    mLink.href = 'data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(manifest))));
+    document.head.appendChild(mLink);
+  })();
+  </script>
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="กันเลขระเบิด">
+  <meta name="theme-color" content="#2a2a4a">
+
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Sarabun',sans-serif}
+    body{background:#f5f0e8;min-height:100vh;padding:18px 14px 60px}
+    h1{text-align:center;font-size:1.4rem;font-weight:800;color:#333;margin-bottom:14px}
+    .controls{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:9px;margin-bottom:12px}
+    .date-box{display:flex;align-items:center;gap:8px;background:white;border-radius:10px;padding:8px 14px;box-shadow:0 2px 8px rgba(0,0,0,.08);border:1px solid #e0d9cc}
+    .date-box span{font-weight:600;font-size:.86rem;color:#555}
+    .date-box input{border:none;outline:none;font-size:.86rem;color:#333;background:transparent;cursor:pointer}
+    .btn{padding:9px 16px;border:none;border-radius:9px;font-size:.86rem;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15);color:white}
+    .btn-red{background:linear-gradient(135deg,#ef5350,#e53935)}
+    .btn-blue{background:linear-gradient(135deg,#42a5f5,#1976d2)}
+    .btn-green{background:linear-gradient(135deg,#66bb6a,#388e3c)}
+    .btn-orange{background:linear-gradient(135deg,#ffa726,#f57c00)}
+    .btn-gray{background:linear-gradient(135deg,#78909c,#546e7a)}
+    .color-row{display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+    .color-row>span{font-size:.84rem;font-weight:700;color:#555}
+    .color-swatch{width:30px;height:30px;border-radius:7px;cursor:pointer;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;transition:all .15s}
+    .color-label{font-size:.78rem;color:#666;font-weight:600;background:white;padding:4px 10px;border-radius:6px;border:1px solid #ddd}
+    .grids{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;max-width:1060px;margin:0 auto}
+    .section{flex:1;min-width:300px;max-width:480px;background:white;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+    .sec-header{padding:11px 16px;text-align:center}
+    .sec-title{font-weight:700;font-size:.92rem;color:#222;margin-bottom:3px}
+    .sec-sub{font-size:.78rem;color:#555;font-weight:600}
+    .sec-sub2{padding:7px;text-align:center;font-size:.76rem;font-weight:700;color:#444;border-bottom:1px solid #ccc}
+    .grid{display:grid;grid-template-columns:repeat(10,1fr);border-top:1px solid #ccc}
+    .cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:clamp(.6rem,1.3vw,.86rem);border-right:1px solid #ddd;border-bottom:1px solid #ddd;cursor:pointer;background:white;color:#333;transition:background .1s;user-select:none;position:relative}
+    .cell:nth-child(10n){border-right:none}
+    .cell.sold{color:transparent}            /* ขายแล้ว = ถมสีทึบ ไม่โชว์เลข */
+    .cell.sel{outline:3px solid #1976d2;outline-offset:-3px;z-index:2}
+    .cell.locked{opacity:.55;cursor:not-allowed;color:transparent}
+    .sec-footer{text-align:center;font-size:.8rem;color:#666;padding:6px;border-top:1px solid #eee}
+    .legend{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:14px;font-size:.8rem;color:#666}
+    .leg-box{width:18px;height:18px;border-radius:4px}
+    .status-bar{text-align:center;font-size:.8rem;padding:6px 0;margin-bottom:8px;font-weight:600}
+    .status-ok{color:#388e3c}.status-err{color:#c62828}.status-loading{color:#1976d2}
+    .combined-wrap{text-align:center;margin-top:14px}
+    .combined-total{font-size:1rem;font-weight:800;color:#333;padding:10px 20px;background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:inline-block}
+
+    /* ===== modal พื้นฐาน ===== */
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:999;padding:16px}
+    .modal{background:white;border-radius:14px;padding:22px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2);max-width:360px;width:100%}
+    .modal h3{font-size:1.1rem;margin-bottom:12px}
+    .modal input[type=text],.modal input[type=number],.modal textarea{width:100%;border:1.5px solid #ccc;border-radius:9px;padding:10px 12px;font-size:1rem;outline:none;margin-bottom:12px}
+    .modal textarea{resize:vertical;min-height:52px}
+    .modal-btns{display:flex;gap:10px;justify-content:center;margin-top:4px}
+    .btn-cancel{padding:9px 20px;border-radius:8px;border:1.5px solid #ccc;background:white;cursor:pointer;font-weight:600;font-size:.9rem;color:#555}
+    .btn-ok{padding:9px 22px;border-radius:8px;border:none;background:linear-gradient(135deg,#66bb6a,#388e3c);color:white;cursor:pointer;font-weight:700;font-size:.9rem}
+    .btn-confirm{padding:9px 22px;border-radius:8px;border:none;background:linear-gradient(135deg,#ef5350,#e53935);color:white;cursor:pointer;font-weight:700;font-size:.9rem}
+
+    /* ===== สถานะ radio ===== */
+    .status-opts{display:flex;flex-direction:column;gap:8px;text-align:left;margin-bottom:12px}
+    .status-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid #ddd;border-radius:9px;cursor:pointer;font-weight:600;font-size:.92rem}
+    .status-opt input{margin:0}
+    .status-opt.sel-unpaid{border-color:#e53935;background:#ffebee}
+    .status-opt.sel-paid{border-color:#43a047;background:#e8f5e9}
+    .status-opt.sel-partial{border-color:#fb8c00;background:#fff3e0}
+    .dot{width:12px;height:12px;border-radius:50%}
+    .dot-unpaid{background:#e53935}.dot-paid{background:#43a047}.dot-partial{background:#fb8c00}
+
+    /* ===== floating add bar ===== */
+    .addbar{position:fixed;left:0;right:0;bottom:0;background:#1a1a2e;color:white;padding:10px 14px;display:none;z-index:900;box-shadow:0 -4px 16px rgba(0,0,0,.3)}
+    .addbar.on{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+    .addbar .info{font-size:.9rem;font-weight:600;flex:1;min-width:150px}
+    .addbar .info b{color:#ffd54f;font-size:1.05rem}
+    .addbar button{padding:9px 16px;border:none;border-radius:8px;font-weight:700;font-size:.88rem;cursor:pointer}
+    .addbar .save{background:#43a047;color:white}
+    .addbar .cancel{background:#555;color:white}
+
+    /* ===== รายงาน overlay ===== */
+    .report-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-start;justify-content:center;z-index:998;padding:14px;overflow:auto}
+    .report-box{background:white;border-radius:14px;padding:16px;max-width:760px;width:100%;margin:auto}
+    .report-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+    .report-head h3{font-size:1.1rem;color:#222}
+    .rtable{width:100%;border-collapse:collapse;font-size:.82rem}
+    .rtable th{background:#f57c00;color:white;padding:7px 5px;font-weight:700;border:1px solid #e0e0e0}
+    .rtable td{padding:6px 6px;border:1px solid #e0e0e0;vertical-align:middle}
+    .rtable tr:nth-child(even) td{background:#fafafa}
+    .rtable .num{font-weight:700;color:#1565c0;line-height:1.5;word-break:break-word}
+    .rtable .numl{color:#2e7d32}
+    .chip{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.74rem;font-weight:700;color:white;white-space:nowrap}
+    .chip-unpaid{background:#e53935}.chip-paid{background:#43a047}.chip-partial{background:#fb8c00}
+    .rtable .act{color:#1976d2;cursor:pointer;font-weight:700;white-space:nowrap}
+    .rtotals{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;font-size:.9rem;font-weight:700}
+    .rtotals .box{background:#f5f5f5;border-radius:9px;padding:8px 14px}
+    .rtotals .t-all{color:#333}.rtotals .t-got{color:#2e7d32}.rtotals .t-due{color:#c62828}
+    .empty{text-align:center;color:#999;padding:30px 10px;font-size:.95rem}
+
+    /* ===== export overlay ===== */
+    .export-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:999;padding:16px}
+    .export-box{background:white;border-radius:14px;padding:16px;max-width:95vw;max-height:92vh;overflow:auto;text-align:center}
+    .export-hint{font-weight:700;font-size:.95rem;margin-bottom:8px;color:#333}
+    .export-box img{max-width:100%;border-radius:8px;border:1px solid #ddd}
+    .btn-close{margin-top:12px;padding:8px 24px;border-radius:8px;border:none;background:#555;color:white;font-weight:700;font-size:.9rem;cursor:pointer}
+    @media(max-width:640px){.grids{flex-direction:column;align-items:center}}
+  </style>
+</head>
+<body>
+<h1>💥 กันเลขระเบิด</h1>
+<div class="status-bar"><span id="statusMsg" class="status-loading">⏳ กำลังเชื่อมต่อ...</span></div>
+<div class="controls">
+  <div class="date-box">
+    <span>📅 งวดวันที่:</span>
+    <input type="date" id="dateInput"/>
+  </div>
+  <button class="btn btn-green" onclick="startAdd()">➕ เพิ่มเลข</button>
+  <button class="btn btn-orange" onclick="openReport()">📊 รายงาน</button>
+  <button class="btn btn-blue" onclick="exportImage()">📤 ส่งออกภาพ</button>
+  <button class="btn btn-red" onclick="confirmReset()">🔄 รีเซต</button>
+</div>
+<div class="color-row">
+  <span>🎨 สีขายแล้ว:</span>
+  <div id="swatches" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  <span class="color-label" id="colorLabel">ฟ้า</span>
+</div>
+<div class="grids">
+  <div class="section" style="border:2px solid #6db98a">
+    <div class="sec-header" style="background:#d4edda">
+      <div class="sec-title" id="titleBottom">เบอร์เงินสด (2ตัวล่าง) งวดวันที่ ...</div>
+      <div class="sec-sub">เบอร์ละ 100 บาท <span style="color:#c62828">***เงินสด 7,100 บาท***</span></div>
+    </div>
+    <div class="sec-sub2" style="background:#a8d5b5">เบอร์ละ 100 บาท ***เงินสด 7,100 บาท***</div>
+    <div class="grid" id="gridBottom"></div>
+    <div class="sec-footer">ขายแล้ว: <strong id="soldBottom">0</strong> / 100 เลข</div>
+  </div>
+  <div class="section" style="border:2px solid #e91e8c">
+    <div class="sec-header" style="background:#fce4ec">
+      <div class="sec-title" id="titleTop">เบอร์เงินสด (2ตัวบน) งวดวันที่ ...</div>
+      <div class="sec-sub">เบอร์ละ 100 บาท <span style="color:#c62828">***เงินสด 7,100 บาท***</span></div>
+    </div>
+    <div class="sec-sub2" style="background:#f8bbd0">เบอร์ละ 100 บาท ***เงินสด 7,100 บาท***</div>
+    <div class="grid" id="gridTop"></div>
+    <div class="sec-footer">ขายแล้ว: <strong id="soldTop">0</strong> / 100 เลข</div>
+  </div>
+</div>
+<div class="combined-wrap"><span class="combined-total" id="combinedTotal">ขายแล้ว 0 / 200 เลข</span></div>
+<div class="legend">
+  <div style="display:flex;align-items:center;gap:6px"><div class="leg-box" id="legSold" style="border:1px solid #ccc"></div>ขายแล้ว</div>
+  <div style="display:flex;align-items:center;gap:6px"><div class="leg-box" style="background:white;border:1px solid #bbb"></div>ว่าง</div>
+</div>
+
+<!-- แถบลอยตอนเพิ่มเลข -->
+<div class="addbar" id="addBar">
+  <div class="info">👤 <b id="abName"></b> · เลือก <b id="abCount">0</b> เลข · <b id="abPrice">฿0</b></div>
+  <button class="cancel" onclick="cancelAdd()">✕ ยกเลิก</button>
+  <button class="save" onclick="openSaveModal()">✓ บันทึก</button>
+</div>
+
+<!-- modal: กรอกชื่อผู้ซื้อ -->
+<div class="modal-bg" id="nameModal">
+  <div class="modal">
+    <h3>👤 ชื่อผู้ซื้อ</h3>
+    <input type="text" id="nameInput" placeholder="เช่น พี่เมย์, แม่ดวน" autocomplete="off"/>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeName()">ยกเลิก</button>
+      <button class="btn-ok" onclick="confirmName()">ถัดไป →</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal: บันทึกผู้ซื้อ (สถานะ+ยอด+หมายเหตุ) -->
+<div class="modal-bg" id="saveModal">
+  <div class="modal">
+    <h3 id="smTitle">💾 บันทึกผู้ซื้อ</h3>
+    <div style="font-size:.9rem;color:#555;margin-bottom:12px" id="smSummary"></div>
+    <div class="status-opts" id="smStatus"></div>
+    <input type="number" id="paidInput" placeholder="ยอดที่จ่ายมา (บาท)" style="display:none" min="0"/>
+    <textarea id="noteInput" placeholder="หมายเหตุ (ถ้ามี)"></textarea>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="smDelBtn" style="display:none" onclick="deleteEditing()">🗑️ ลบ</button>
+      <button class="btn-cancel" onclick="closeSave()">ยกเลิก</button>
+      <button class="btn-ok" onclick="commitBuyer()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal: ยืนยันรีเซต -->
+<div class="modal-bg" id="resetModal">
+  <div class="modal">
+    <div style="font-size:2rem;margin-bottom:8px">🔄</div>
+    <h3>ยืนยันการรีเซตงวดนี้</h3>
+    <p style="color:#666;font-size:.9rem;margin-bottom:16px">ผู้ซื้อทั้งหมดในงวดนี้จะถูกล้าง (งวดอื่นไม่กระทบ)</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="hide('resetModal')">ยกเลิก</button>
+      <button class="btn-confirm" onclick="doReset()">รีเซตเลย</button>
+    </div>
+  </div>
+</div>
+
+<!-- รายงาน -->
+<div class="report-bg" id="reportBg">
+  <div class="report-box" id="reportBox">
+    <div class="report-head">
+      <h3 id="reportTitle">📊 รายงานผู้ซื้อ</h3>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-blue" onclick="exportReport()">📤 บันทึกภาพ</button>
+        <button class="btn btn-gray" onclick="hide('reportBg')">✕ ปิด</button>
+      </div>
+    </div>
+    <div id="reportBody"></div>
+  </div>
+</div>
+
+<!-- export overlay -->
+<div class="export-bg" id="exportOverlay">
+  <div class="export-box">
+    <div class="export-hint">📸 กดค้างที่รูปเพื่อบันทึก (มือถือ) หรือคลิกขวา → Save Image (คอม)</div>
+    <img id="exportImg" src="" alt="รูปส่งออก"/>
+    <br/><button class="btn-close" onclick="hide('exportOverlay')">✕ ปิด</button>
+  </div>
+</div>
+
+<script>
+/* ===================== CONFIG ===================== */
+const SUPABASE_URL='https://xlsbabusatrlfolkrjmv.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhsc2JhYnVzYXRybGZvbGtyam12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NTQyNzMsImV4cCI6MjA5MjUzMDI3M30.o8VJdMx6RFqOb1X96iJGey-NlHyx6KNFwLkYdq3_YU0';
+const PRICE_PER=100;               // ราคาต่อเลข
+const {createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const COLORS=[
+  {label:'ฟ้า',bg:'#90caf9',text:'#0d47a1'},
+  {label:'เขียว',bg:'#a5d6a7',text:'#1b5e20'},
+  {label:'เหลือง',bg:'#fff176',text:'#795548'},
+  {label:'ส้ม',bg:'#ffcc80',text:'#e65100'},
+  {label:'ชมพู',bg:'#f48fb1',text:'#880e4f'},
+  {label:'ม่วง',bg:'#ce93d8',text:'#4a148c'},
+  {label:'แดง',bg:'#ef9a9a',text:'#b71c1c'},
+  {label:'เทา',bg:'#b0bec5',text:'#263238'},
+];
+const THAI_MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+/* ===================== STATE ===================== */
+let buyers=[];                     // [{id,name,top:[],bottom:[],status,paid,note,ts}]
+let soldColor=COLORS[0];
+let dateVal='';
+let saving=false,pendingSave=false;
+let mode='normal';                 // 'normal' | 'adding'
+let draft=null;                    // {name, top:Set, bottom:Set}
+let editingId=null;                // buyer id ที่กำลังแก้ใน saveModal
+let smStatusVal='unpaid';
+
+/* วันที่เริ่มต้น = วันนี้ */
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+/* ===================== HELPERS ===================== */
+function hide(id){document.getElementById(id).style.display='none';}
+function show(id){document.getElementById(id).style.display='flex';}
+function formatThaiDate(d){if(!d)return'';const[y,m,day]=d.split('-');return parseInt(day)+' '+THAI_MONTHS[parseInt(m)-1]+' '+(parseInt(y)+543);}
+function setStatus(msg,type){const el=document.getElementById('statusMsg');el.textContent=msg;el.className='status-'+type;}
+function priceOf(b){return (b.top.length+b.bottom.length)*PRICE_PER;}
+function ownerOf(grid,n){for(const b of buyers){if((grid==='top'?b.top:b.bottom).includes(n))return b;}return null;}
+function soldCount(grid){const s=new Set();buyers.forEach(b=>(grid==='top'?b.top:b.bottom).forEach(n=>s.add(n)));return s.size;}
+
+/* ===================== COLOR SWATCHES ===================== */
+const swatchDiv=document.getElementById('swatches');
+COLORS.forEach(c=>{const d=document.createElement('div');d.className='color-swatch';d.title=c.label;d.style.background=c.bg;if(c.label===soldColor.label){d.style.border='3px solid '+c.text;d.textContent='✓';d.style.color=c.text;}d.onclick=()=>{soldColor=c;renderAll();save();};swatchDiv.appendChild(d);});
+function updateSwatches(){const divs=[...swatchDiv.children];COLORS.forEach((c,i)=>{const el=divs[i];el.style.border=c.label===soldColor.label?'3px solid '+c.text:'2px solid #ccc';el.textContent=c.label===soldColor.label?'✓':'';el.style.color=c.text;});document.getElementById('colorLabel').textContent=soldColor.label;document.getElementById('legSold').style.background=soldColor.bg;document.getElementById('legSold').style.border='1px solid '+soldColor.text;}
+
+/* ===================== GRID RENDER ===================== */
+function buildGrid(id,grid){
+  const g=document.getElementById(id);g.innerHTML='';
+  for(let n=0;n<100;n++){
+    const c=document.createElement('div');c.className='cell';c.textContent=String(n).padStart(2,'0');
+    const owner=ownerOf(grid,n);
+    if(mode==='adding'){
+      const selSet=(grid==='top'?draft.top:draft.bottom);
+      if(owner){ c.classList.add('locked'); c.style.background=soldColor.bg; }
+      else if(selSet.has(n)){ c.classList.add('sel'); c.style.background='#e3f2fd'; c.onclick=()=>toggleSel(grid,n); }
+      else { c.onclick=()=>toggleSel(grid,n); }
+    } else {
+      if(owner){ c.classList.add('sold'); c.style.background=soldColor.bg; c.onclick=()=>showBuyer(owner.id); }
+      else { c.onclick=()=>hintAdd(); }
+    }
+    g.appendChild(c);
+  }
+}
+function renderAll(){
+  const dt=formatThaiDate(dateVal);
+  document.getElementById('titleBottom').textContent='เบอร์เงินสด (2ตัวล่าง) งวดวันที่ '+dt;
+  document.getElementById('titleTop').textContent='เบอร์เงินสด (2ตัวบน) งวดวันที่ '+dt;
+  buildGrid('gridBottom','bottom');
+  buildGrid('gridTop','top');
+  const sb=soldCount('bottom'),st=soldCount('top');
+  document.getElementById('soldBottom').textContent=sb;
+  document.getElementById('soldTop').textContent=st;
+  document.getElementById('combinedTotal').textContent='ขายแล้ว '+(sb+st)+' / 200 เลข';
+  updateSwatches();
+}
+
+/* ===================== ADD-BUYER FLOW ===================== */
+function hintAdd(){ if(mode==='normal') setStatus('กดปุ่ม ➕ เพิ่มเลข ก่อน แล้วค่อยเลือกเลข','loading'); }
+function startAdd(){
+  editingId=null;
+  document.getElementById('nameInput').value='';
+  show('nameModal');
+  setTimeout(()=>document.getElementById('nameInput').focus(),100);
+}
+function closeName(){hide('nameModal');}
+function confirmName(){
+  const name=document.getElementById('nameInput').value.trim();
+  if(!name){alert('กรุณากรอกชื่อผู้ซื้อ');return;}
+  hide('nameModal');
+  draft={name,top:new Set(),bottom:new Set()};
+  mode='adding';
+  document.getElementById('abName').textContent=name;
+  document.getElementById('addBar').classList.add('on');
+  renderAll();
+  updateAddBar();
+  setStatus('เลือกเลขบนตาราง บน/ล่าง ได้เลย','loading');
+  window.scrollTo({top:document.querySelector('.grids').offsetTop-70,behavior:'smooth'});
+}
+function toggleSel(grid,n){
+  const s=(grid==='top'?draft.top:draft.bottom);
+  if(s.has(n))s.delete(n);else s.add(n);
+  renderAll();updateAddBar();
+}
+function updateAddBar(){
+  const cnt=draft.top.size+draft.bottom.size;
+  document.getElementById('abCount').textContent=cnt;
+  document.getElementById('abPrice').textContent='฿'+(cnt*PRICE_PER).toLocaleString();
+}
+function cancelAdd(){
+  mode='normal';draft=null;editingId=null;
+  document.getElementById('addBar').classList.remove('on');
+  renderAll();setStatus('ยกเลิกการเพิ่มเลขแล้ว','ok');
+}
+
+/* ===== save modal ===== */
+function statusOptHTML(val,label,cls){
+  return '<label class="status-opt" data-v="'+val+'"><input type="radio" name="st" value="'+val+'"><span class="dot dot-'+val+'"></span>'+label+'</label>';
+}
+function openSaveModal(){
+  const cnt=draft.top.size+draft.bottom.size;
+  if(cnt===0){alert('ยังไม่ได้เลือกเลข');return;}
+  buildSaveModal({name:draft.name,top:[...draft.top],bottom:[...draft.bottom]},false);
+}
+function buildSaveModal(data,isEdit){
+  document.getElementById('smTitle').textContent=isEdit?'✏️ แก้ไขผู้ซื้อ':'💾 บันทึกผู้ซื้อ';
+  const total=(data.top.length+data.bottom.length)*PRICE_PER;
+  const topS=data.top.length?data.top.map(n=>String(n).padStart(2,'0')).join(' '):'-';
+  const botS=data.bottom.length?data.bottom.map(n=>String(n).padStart(2,'0')).join(' '):'-';
+  document.getElementById('smSummary').innerHTML='👤 <b>'+data.name+'</b><br>บน: '+topS+'<br>ล่าง: '+botS+'<br><b style="color:#1565c0">รวม ฿'+total.toLocaleString()+'</b>';
+  const wrap=document.getElementById('smStatus');
+  wrap.innerHTML=statusOptHTML('unpaid','ยังไม่จ่าย')+statusOptHTML('paid','จ่ายแล้ว')+statusOptHTML('partial','จ่ายบางส่วน');
+  smStatusVal=isEdit?data.status:'unpaid';
+  [...wrap.querySelectorAll('.status-opt')].forEach(el=>{
+    el.onclick=()=>{el.querySelector('input').checked=true;setSmStatus(el.dataset.v);};
+  });
+  document.getElementById('paidInput').value=(isEdit&&data.paid)?data.paid:'';
+  document.getElementById('noteInput').value=isEdit?(data.note||''):'';
+  document.getElementById('smDelBtn').style.display=isEdit?'block':'none';
+  setSmStatus(smStatusVal);
+  show('saveModal');
+}
+function setSmStatus(v){
+  smStatusVal=v;
+  const wrap=document.getElementById('smStatus');
+  [...wrap.querySelectorAll('.status-opt')].forEach(el=>{
+    el.className='status-opt'+(el.dataset.v===v?(' sel-'+v):'');
+    el.querySelector('input').checked=(el.dataset.v===v);
+  });
+  document.getElementById('paidInput').style.display=(v==='partial')?'block':'none';
+}
+function closeSave(){hide('saveModal');}
+function commitBuyer(){
+  let paid=0;
+  if(smStatusVal==='partial'){
+    paid=parseInt(document.getElementById('paidInput').value)||0;
+    if(paid<=0){alert('กรุณากรอกยอดที่จ่ายมา');return;}
+  }
+  const note=document.getElementById('noteInput').value.trim();
+  if(editingId){
+    const b=buyers.find(x=>x.id===editingId);
+    if(b){b.status=smStatusVal;b.paid=(smStatusVal==='paid')?priceOf(b):(smStatusVal==='partial'?paid:0);b.note=note;}
+  } else {
+    const b={id:'b'+Date.now()+Math.floor(Math.random()*1000),name:draft.name,top:[...draft.top].sort((a,b)=>a-b),bottom:[...draft.bottom].sort((a,b)=>a-b),status:smStatusVal,paid:0,note,ts:Date.now()};
+    b.paid=(smStatusVal==='paid')?priceOf(b):(smStatusVal==='partial'?paid:0);
+    buyers.push(b);
+  }
+  hide('saveModal');
+  mode='normal';draft=null;editingId=null;
+  document.getElementById('addBar').classList.remove('on');
+  renderAll();save();
+  if(document.getElementById('reportBg').style.display==='flex')renderReport();
+  setStatus('บันทึกผู้ซื้อแล้ว ✓','ok');
+}
+
+/* ===== แตะเลขที่ขายแล้ว / แก้ไขจากรายงาน ===== */
+function showBuyer(id){
+  const b=buyers.find(x=>x.id===id);if(!b)return;
+  editingId=id;
+  buildSaveModal(b,true);
+}
+function deleteEditing(){
+  if(!editingId)return;
+  const b=buyers.find(x=>x.id===editingId);
+  if(!confirm('ลบผู้ซื้อ "'+(b?b.name:'')+'" ? เลขที่จองไว้จะกลับมาว่าง'))return;
+  buyers=buyers.filter(x=>x.id!==editingId);
+  editingId=null;hide('saveModal');
+  renderAll();save();
+  if(document.getElementById('reportBg').style.display==='flex')renderReport();
+  setStatus('ลบผู้ซื้อแล้ว','ok');
+}
+
+/* ===================== REPORT ===================== */
+function openReport(){show('reportBg');renderReport();}
+function renderReport(){
+  document.getElementById('reportTitle').textContent='📊 รายงานผู้ซื้อ — งวด '+formatThaiDate(dateVal);
+  const body=document.getElementById('reportBody');
+  if(buyers.length===0){body.innerHTML='<div class="empty">ยังไม่มีผู้ซื้อในงวดนี้</div>';return;}
+  const chip={unpaid:'<span class="chip chip-unpaid">ยังไม่จ่าย</span>',paid:'<span class="chip chip-paid">จ่ายแล้ว</span>',partial:'<span class="chip chip-partial">จ่ายบางส่วน</span>'};
+  let all=0,got=0;
+  let rows='';
+  buyers.forEach((b,i)=>{
+    const t=priceOf(b);all+=t;
+    const g=b.status==='paid'?t:(b.status==='partial'?(b.paid||0):0);got+=g;
+    const topS=b.top.length?b.top.map(n=>String(n).padStart(2,'0')).join(' '):'-';
+    const botS=b.bottom.length?b.bottom.map(n=>String(n).padStart(2,'0')).join(' '):'-';
+    let st=chip[b.status];
+    if(b.status==='partial')st+='<br><span style="font-size:.72rem;color:#e65100">จ่าย '+(b.paid||0).toLocaleString()+'/'+t.toLocaleString()+'</span>';
+    const note=b.note?('<br><span style="font-size:.72rem;color:#888">📝 '+b.note+'</span>'):'';
+    rows+='<tr>'
+      +'<td style="text-align:center">'+(i+1)+'</td>'
+      +'<td><b>'+b.name+'</b>'+note+'</td>'
+      +'<td class="num">บน: '+topS+'<br><span class="numl">ล่าง: '+botS+'</span></td>'
+      +'<td style="text-align:center">'+st+'</td>'
+      +'<td style="text-align:right;font-weight:700">'+t.toLocaleString()+'</td>'
+      +'<td style="text-align:center"><span class="act" onclick="showBuyer(\''+b.id+'\')">แก้ไข</span></td>'
+      +'</tr>';
+  });
+  const due=all-got;
+  body.innerHTML='<div style="overflow-x:auto"><table class="rtable"><thead><tr>'
+    +'<th>#</th><th>ชื่อ</th><th>หมายเลขที่ซื้อ</th><th>สถานะ</th><th>ยอดรวม</th><th></th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div class="rtotals">'
+    +'<div class="box t-all">รวมทั้งหมด ฿'+all.toLocaleString()+'</div>'
+    +'<div class="box t-got">เก็บได้แล้ว ฿'+got.toLocaleString()+'</div>'
+    +'<div class="box t-due">ค้างชำระ ฿'+due.toLocaleString()+'</div>'
+    +'</div>';
+}
+
+/* ===================== SUPABASE SYNC (ต่องวด) ===================== */
+async function save(){
+  if(saving){pendingSave=true;return;}
+  saving=true;setStatus('💾 กำลังบันทึก...','loading');
+  try{
+    const{error}=await db.from('lottery_draws').upsert({id:dateVal,buyers,sold_color:soldColor.label,updated_at:new Date().toISOString()});
+    if(error)throw error;
+    setStatus('✅ บันทึกแล้ว — ทุกคนเห็นข้อมูลเดียวกัน','ok');
+  }catch(e){setStatus('❌ บันทึกไม่สำเร็จ: '+e.message,'err');}
+  saving=false;if(pendingSave){pendingSave=false;save();}
+}
+async function loadDraw(d){
+  setStatus('⏳ กำลังโหลดงวด '+formatThaiDate(d)+'...','loading');
+  const{data,error}=await db.from('lottery_draws').select('*').eq('id',d).maybeSingle();
+  if(error){setStatus('❌ โหลดไม่สำเร็จ: '+error.message,'err');return;}
+  if(data){
+    buyers=Array.isArray(data.buyers)?data.buyers:[];
+    soldColor=COLORS.find(c=>c.label===data.sold_color)||COLORS[0];
+  }else{
+    buyers=[];
+  }
+  renderAll();
+  setStatus('✅ พร้อมใช้งาน — ซิงค์เรียลไทม์','ok');
+}
+
+let channel=null;
+function subscribe(){
+  if(channel)db.removeChannel(channel);
+  channel=db.channel('draw-'+dateVal)
+    .on('postgres_changes',{event:'*',schema:'public',table:'lottery_draws',filter:'id=eq.'+dateVal},(payload)=>{
+      if(mode==='adding')return; // อย่ารบกวนตอนกำลังเพิ่มเลข
+      const d=payload.new;
+      if(!d||d.id!==dateVal)return;
+      buyers=Array.isArray(d.buyers)?d.buyers:[];
+      soldColor=COLORS.find(c=>c.label===d.sold_color)||soldColor;
+      renderAll();
+      if(document.getElementById('reportBg').style.display==='flex')renderReport();
+      setStatus('🔄 รับข้อมูลอัปเดตจากอุปกรณ์อื่น','ok');
+    }).subscribe();
+}
+
+/* ===== เปลี่ยนงวด ===== */
+document.getElementById('dateInput').addEventListener('change',async e=>{
+  if(mode==='adding')cancelAdd();
+  dateVal=e.target.value;
+  await loadDraw(dateVal);
+  subscribe();
+});
+
+/* ===================== RESET ===================== */
+function confirmReset(){show('resetModal');}
+function doReset(){buyers=[];hide('resetModal');renderAll();save();setStatus('รีเซตงวดนี้แล้ว','ok');}
+
+/* ===================== EXPORT IMAGE (ตาราง) ===================== */
+async function exportImage(){
+  const btn=document.querySelector('.btn-blue');
+  const grids=document.querySelector('.grids');
+  const sects=[...document.querySelectorAll('.section')];
+  grids.style.flexDirection='row';grids.style.flexWrap='nowrap';grids.style.maxWidth='none';
+  grids.style.width='fit-content';grids.style.padding='32px';grids.style.background='#f5f0e8';grids.style.borderRadius='16px';
+  sects.forEach(s=>{s.style.flex='none';s.style.width='460px';s.style.minWidth='460px';s.style.maxWidth='460px';});
+  try{
+    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+    const canvas=await html2canvas(grids,{scale:2,useCORS:true,logging:false,windowWidth:1200,backgroundColor:'#f5f0e8'});
+    document.getElementById('exportImg').src=canvas.toDataURL('image/png');
+    show('exportOverlay');
+  }catch(e){alert('เกิดข้อผิดพลาด: '+e.message);}
+  finally{
+    ['flexDirection','flexWrap','maxWidth','width','padding','background','borderRadius'].forEach(p=>grids.style[p]='');
+    sects.forEach(s=>{s.style.flex='';s.style.width='';s.style.minWidth='';s.style.maxWidth='';});
+  }
+}
+
+/* ===== EXPORT รายงาน ===== */
+async function exportReport(){
+  if(buyers.length===0){alert('ยังไม่มีผู้ซื้อในงวดนี้');return;}
+  const box=document.getElementById('reportBox');
+  const prevBg=document.getElementById('reportBg').style.background;
+  document.getElementById('reportBg').style.background='#fff';
+  try{
+    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+    const canvas=await html2canvas(box,{scale:2,useCORS:true,logging:false,backgroundColor:'#ffffff'});
+    document.getElementById('exportImg').src=canvas.toDataURL('image/png');
+    show('exportOverlay');
+  }catch(e){alert('เกิดข้อผิดพลาด: '+e.message);}
+  finally{document.getElementById('reportBg').style.background=prevBg;}
+}
+
+/* ===================== INIT ===================== */
+(async function init(){
+  dateVal=todayStr();
+  document.getElementById('dateInput').value=dateVal;
+  await loadDraw(dateVal);
+  subscribe();
+})();
+</script>
+</body>
+</html>
