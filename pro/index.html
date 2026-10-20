@@ -562,9 +562,12 @@ function doReset(){buyers=[];hide('resetModal');renderAll();save();setStatus('�
 async function exportImage(){
   const grids=document.querySelector('.grids');
   const sects=[...document.querySelectorAll('.section')];
+  const ftrs=[...document.querySelectorAll('.sec-footer')];
+  const fh=ftrs.map(f=>f.innerHTML);
   grids.style.flexDirection='row';grids.style.flexWrap='nowrap';grids.style.maxWidth='none';
   grids.style.width='fit-content';grids.style.padding='32px';grids.style.background='#f5f0e8';grids.style.borderRadius='16px';
   sects.forEach(s=>{s.style.flex='none';s.style.width='460px';s.style.minWidth='460px';s.style.maxWidth='460px';});
+  ftrs.forEach(f=>{f.innerHTML='<b style="color:#555">ขอบคุณที่ใช้บริการครับ</b>';});
   try{
     await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
     const canvas=await html2canvas(grids,{scale:2,useCORS:true,logging:false,windowWidth:1200,backgroundColor:'#f5f0e8'});
@@ -574,6 +577,7 @@ async function exportImage(){
   finally{
     ['flexDirection','flexWrap','maxWidth','width','padding','background','borderRadius'].forEach(p=>grids.style[p]='');
     sects.forEach(s=>{s.style.flex='';s.style.width='';s.style.minWidth='';s.style.maxWidth='';});
+    ftrs.forEach((f,i)=>f.innerHTML=fh[i]);
   }
 }
 async function exportReport(){
