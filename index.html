@@ -54,6 +54,9 @@
     .btn-orange{background:linear-gradient(135deg,#ffa726,#f57c00)}
     .btn-gray{background:linear-gradient(135deg,#78909c,#546e7a)}
     .btn-purple{background:linear-gradient(135deg,#ab47bc,#7b1fa2)}
+    .btn-fest{background:linear-gradient(135deg,#ff7043,#8e24aa)}
+    .fest-greet{text-align:center;font-weight:800;font-size:1.05rem;margin:-6px 0 12px}
+    #festDeco span{position:fixed;font-size:2rem;opacity:.5;pointer-events:none;z-index:1;user-select:none}
     .theme-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:10px;border:1px solid #eee;border-radius:10px}
     .theme-row>b{width:100%;font-size:.9rem;color:#333;margin-bottom:2px}
     .theme-sw{width:28px;height:28px;border-radius:7px;cursor:pointer;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800}
@@ -140,7 +143,9 @@
   </style>
 </head>
 <body>
-<h1>🎟️ ระบบจัดการขายหวย</h1>
+<div id="festDeco"></div>
+<h1 id="pageTitle">🎟️ ระบบจัดการขายหวย</h1>
+<div id="festGreet" class="fest-greet" style="display:none"></div>
 <div class="status-bar"><span id="statusMsg" class="status-loading">⏳ กำลังเชื่อมต่อ...</span></div>
 <div class="controls">
   <div class="date-box">
@@ -151,6 +156,7 @@
   <button class="btn btn-orange" onclick="openReport()">📊 รายงาน</button>
   <button class="btn btn-blue" onclick="exportImage()">📤 ส่งออกภาพ</button>
   <button class="btn btn-purple" onclick="openTheme()">🎨 สีกรอบ</button>
+  <button class="btn btn-fest" onclick="openFestival()">🎪 ธีม</button>
   <button class="btn btn-red" onclick="confirmReset()">🔄 รีเซต</button>
 </div>
 <div class="color-row">
@@ -246,6 +252,14 @@
     <div class="theme-row"><b>⬇️ ตารางล่าง (2ตัวล่าง)</b><div id="themeSwBottom" style="display:flex;gap:7px;flex-wrap:wrap"></div></div>
     <div class="theme-row"><b>⬆️ ตารางบน (2ตัวบน)</b><div id="themeSwTop" style="display:flex;gap:7px;flex-wrap:wrap"></div></div>
     <div class="modal-btns"><button class="btn-ok" onclick="hide('themeModal')">เสร็จ</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="festModal">
+  <div class="modal" style="max-width:380px">
+    <h3>🎪 ธีมเทศกาล</h3>
+    <div id="festList" style="display:flex;flex-direction:column;gap:9px;margin-bottom:6px"></div>
+    <div class="modal-btns"><button class="btn-ok" onclick="hide('festModal')">เสร็จ</button></div>
   </div>
 </div>
 
@@ -345,7 +359,47 @@ function buildThemeSwatches(){
   });
 }
 function openTheme(){buildThemeSwatches();show('themeModal');}
-function pickTheme(side,label){if(side==='Bottom')themeBottom=label;else themeTop=label;applyTheme();buildThemeSwatches();try{localStorage.setItem('themeBottom_'+TENANT,themeBottom);localStorage.setItem('themeTop_'+TENANT,themeTop);}catch(e){}save();}
+function pickTheme(side,label){if(side==='Bottom')themeBottom=label;else themeTop=label;applyTheme();applyFestival();buildThemeSwatches();try{localStorage.setItem('themeBottom_'+TENANT,themeBottom);localStorage.setItem('themeTop_'+TENANT,themeTop);}catch(e){}save();}
+
+/* ===================== THEME เทศกาล ===================== */
+const PAGE_TITLE='🎟️ ระบบจัดการขายหวย',PAGE_BG='#f5f0e8';
+const FESTIVALS={
+  none:{label:'ปกติ (ไม่มีธีม)',icon:'🎟️'},
+  halloween:{label:'ฮาโลวีน',icon:'🎃',
+    bg:'linear-gradient(165deg,#f6ebd6,#ece0f0)',
+    title:'🎃 ระบบจัดการขายหวย 👻',titleColor:'#e65100',
+    greet:'🎃 สุขสันต์วันฮาโลวีน 👻',greetColor:'#7b1fa2',
+    frameB:'#e8833a',hdrB:'#ffe6d2',frameT:'#8e5fd0',hdrT:'#efe3fb',
+    deco:[['🦇','top:72px;left:10px'],['🦇','top:120px;right:14px;font-size:1.5rem'],['🕸️','top:4px;right:6px;opacity:.3'],['🕸️','top:4px;left:6px;opacity:.3;transform:scaleX(-1)'],['🎃','bottom:14px;left:12px'],['👻','bottom:16px;right:14px']]
+  }
+};
+let festival='none';
+try{festival=localStorage.getItem('fest_'+TENANT)||'none';}catch(e){}
+function applyFestival(){
+  const f=FESTIVALS[festival]||FESTIVALS.none;
+  document.body.style.background=f.bg||PAGE_BG;
+  const t=document.getElementById('pageTitle');t.textContent=f.title||PAGE_TITLE;t.style.color=f.titleColor||'';
+  const g=document.getElementById('festGreet');
+  if(f.greet){g.textContent=f.greet;g.style.color=f.greetColor||'#333';g.style.display='block';}else g.style.display='none';
+  if(f.frameB){
+    document.getElementById('secBottom').style.border='2px solid '+f.frameB;
+    document.getElementById('hdrBottom').style.background=f.hdrB;
+    document.getElementById('secTop').style.border='2px solid '+f.frameT;
+    document.getElementById('hdrTop').style.background=f.hdrT;
+  }
+  const d=document.getElementById('festDeco');d.innerHTML='';
+  (f.deco||[]).forEach(([em,css])=>{const s=document.createElement('span');s.textContent=em;s.style.cssText=css;d.appendChild(s);});
+}
+function openFestival(){
+  const list=document.getElementById('festList');list.innerHTML='';
+  Object.entries(FESTIVALS).forEach(([key,f])=>{
+    const el=document.createElement('div');el.className='status-opt'+(key===festival?' sel-paid':'');
+    el.innerHTML='<span style="font-size:1.3rem">'+(f.icon||'🎪')+'</span> '+f.label;
+    el.onclick=()=>pickFestival(key);list.appendChild(el);
+  });
+  show('festModal');
+}
+function pickFestival(key){festival=key;try{localStorage.setItem('fest_'+TENANT,key);}catch(e){}applyFestival();openFestival();}
 
 /* ===================== GRID RENDER ===================== */
 function buildGrid(id,grid){
@@ -377,6 +431,7 @@ function renderAll(){
   document.getElementById('combinedTotal').textContent='ขายแล้ว '+(sb+st)+' / 200 เลข';
   updateSwatches();
   applyTheme();
+  applyFestival();
 }
 
 /* ===================== ADD-BUYER FLOW ===================== */
